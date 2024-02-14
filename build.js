@@ -4,7 +4,7 @@ const replace = require("replace-in-file");
 dotenv.config();
 
 const options = {
-  files: "/firebaseConfig.js",
+  files: "firebaseConfig.js",
   from: [
     /__API_KEY__/g,
     /__AUTH_DOMAIN__/g,
