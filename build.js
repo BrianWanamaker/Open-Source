@@ -1,8 +1,10 @@
-require("dotenv").config();
-const replace = require("replace-in-file");
+import dotenv from "dotenv";
+import replace from "replace-in-file";
+
+dotenv.config();
 
 const options = {
-  files: "path/to/your/firebaseConfig.js",
+  files: "/firebaseConfig.js",
   from: [
     /__API_KEY__/g,
     /__AUTH_DOMAIN__/g,
