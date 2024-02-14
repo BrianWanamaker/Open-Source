@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-import replace from "replace-in-file";
+const dotenv = require("dotenv");
+const replace = require("replace-in-file");
 
 dotenv.config();
 
