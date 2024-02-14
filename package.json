@@ -1,7 +1,7 @@
 {
   "name": "test-package",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.html",
   "scripts": {
     "build": "node build.js"
