@@ -4,7 +4,6 @@ const replace = require("replace-in-file");
 
 // Load environment variables from .env file
 dotenv.config();
-console.log(process.env);
 
 // Define the path to the Firebase configuration file
 const firebaseConfigPath = "firebaseConfig.js";
@@ -43,7 +42,6 @@ const options = {
 };
 
 // Perform the replacement
-console.log(options);
 replace(options)
   .then((results) => {
     console.log("Replacement results:", results);
