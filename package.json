@@ -2,9 +2,9 @@
   "name": "test-package",
   "version": "1.0.0",
   "type": "commonjs",
-  "main": "index.html",
+  "main": "app.js",
   "scripts": {
-    "build": "node build.js --output public"
+    "prebuild": "node build.js --output public"
   },
   "dependencies": {
     "dotenv": "^16.4.4",

@@ -8,5 +8,5 @@ const firebaseConfig = {
   appId: "__APP_ID__",
   measurementId: "__MEASUREMENT_ID__",
 };
-console.log("initializing firebase...");
+
 firebase.initializeApp(firebaseConfig);
