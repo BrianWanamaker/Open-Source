@@ -7,8 +7,8 @@
     "prestart": "node build.js",
     "start": "serve -s build",
     "prebuild": "node build.js",
-    "build": "your_actual_build_command"
-  },  
+    "build": "uglifyjs src/js/*.js -o build/js/app.min.js && cleancss src/css/*.css -o build/css/style.min.css"
+  },
   "dependencies": {
     "dotenv": "^16.4.4",
     "express": "^4.18.2",
