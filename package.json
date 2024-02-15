@@ -7,7 +7,7 @@
     "prestart": "node build.js",
     "start": "serve -s build",
     "prebuild": "node build.js",
-    "build": "npx uglifyjs src/js/*.js -o build/js/app.min.js && npx cleancss src/css/*.css -o build/css/style.min.css"
+    "build": "node build.js ouput --public"
   },
   "dependencies": {
     "dotenv": "^16.4.4",
