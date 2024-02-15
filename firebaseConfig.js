@@ -1,3 +1,5 @@
+firebase.initializeApp(firebaseConfig);
+
 const firebaseConfig = {
   apiKey: "__API_KEY__",
   authDomain: "__AUTH_DOMAIN__",
