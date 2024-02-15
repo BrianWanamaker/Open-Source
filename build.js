@@ -7,7 +7,7 @@ dotenv.config();
 console.log("API Key:", process.env.API_KEY);
 
 // Define the path to the Firebase configuration file
-const firebaseConfigPath = "./firebaseConfig.js";
+const firebaseConfigPath = "firebaseConfig.js";
 
 // Ensure firebaseConfig.js exists
 if (!fs.existsSync(firebaseConfigPath)) {
