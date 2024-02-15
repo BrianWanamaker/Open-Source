@@ -285,7 +285,6 @@ function getRandomSafeSpot() {
   }
 
   firebase.auth().onAuthStateChanged((user) => {
-    console.log(user);
     if (user) {
       //You're logged in!
       playerId = user.uid;
