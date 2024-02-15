@@ -4,7 +4,7 @@
   "type": "commonjs",
   "main": "index.html",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js --output public"
   },
   "dependencies": {
     "dotenv": "^16.4.4",
