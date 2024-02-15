@@ -1,5 +1,3 @@
-firebase.initializeApp(firebaseConfig);
-
 const firebaseConfig = {
   apiKey: "__API_KEY__",
   authDomain: "__AUTH_DOMAIN__",
@@ -10,3 +8,5 @@ const firebaseConfig = {
   appId: "__APP_ID__",
   measurementId: "__MEASUREMENT_ID__",
 };
+
+firebase.initializeApp(firebaseConfig);
