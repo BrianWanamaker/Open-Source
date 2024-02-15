@@ -4,7 +4,6 @@ const replace = require("replace-in-file");
 
 // Load environment variables from .env file
 dotenv.config();
-console.log("API Key:", process.env.API_KEY);
 
 // Define the path to the Firebase configuration file
 const firebaseConfigPath = "firebaseConfig.js";
