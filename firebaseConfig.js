@@ -8,5 +8,3 @@ const firebaseConfig = {
   appId: "__APP_ID__",
   measurementId: "__MEASUREMENT_ID__",
 };
-
-firebase.initializeApp(firebaseConfig);
