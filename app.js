@@ -20,7 +20,7 @@ const mapData = {
 };
 
 // Options for Player Colors... these are in the same order as our sprite sheet
-const playerColors = ["blue", "red", "orange", "yellow", "green", "purple"];
+const playerColors = ["blue", "red", "orange"];
 
 //Misc Helpers
 function randomFromArray(array) {
