@@ -81,7 +81,7 @@ button:active {
 .grid-cell {
   position: absolute;
   width: 16px;
-  height: 16px;
+  height: 19px;
 }
 .Character {
   transition: transform 0.4s;
@@ -142,12 +142,6 @@ button:active {
   background: url(/images/coin.png) no-repeat no-repeat;
   animation: coinFloat 0.8s linear infinite alternate-reverse;
 }
-/* NPCS */
-.Npc_sprite {
-  background: url(/images/characters.png) no-repeat no-repeat;
-  animation: moveNPC 5s linear infinite alternate-reverse;
-}
-
 @keyframes coinFloat {
   from {
     transform: translateY(0);
@@ -156,6 +150,15 @@ button:active {
     transform: translateY(5px);
   }
 }
+/* NPCS */
+.Npc_sprite {
+  background: url(/images/characters.png) no-repeat no-repeat;
+  background-position: 0 0;
+  width: 12px;
+  height: 19px;
+  animation: moveNPC 5s linear infinite alternate-reverse;
+}
+
 @keyframes moveNPC {
   from {
     transform: translateY(0);
