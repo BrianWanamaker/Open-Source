@@ -1,19 +1,25 @@
 * {
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: linear-gradient(180deg, #64BEFF -50%, #6e96ff 69.71%, #2a65ff 150%);
-  font-family: 'Source Sans Pro', sans-serif;
+  background: linear-gradient(
+    180deg,
+    #64beff -50%,
+    #6e96ff 69.71%,
+    #2a65ff 150%
+  );
+  font-family: "Source Sans Pro", sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.game-container { 
+.game-container {
   position: relative;
   width: 240px;
   height: 208px;
@@ -25,11 +31,11 @@ html, body {
 .player-info {
   position: absolute;
   top: 0;
-  left:0;
+  left: 0;
   padding: 1em;
   display: flex;
   gap: 0.5em;
-  align-items: flex-end
+  align-items: flex-end;
 }
 
 label {
@@ -89,7 +95,7 @@ button:active {
 .Character_you-arrow {
   display: none;
   position: absolute;
-  top:-18px;
+  top: -18px;
   left: 5px;
   width: 7px;
   height: 5px;
@@ -101,22 +107,13 @@ button:active {
   background: url(/images/characters.png);
 }
 .Character[data-direction="right"] .Character_sprite {
-  background-position-x: 16px;
+  background-position-x: 19px;
 }
 .Character[data-color="red"] .Character_sprite {
-  background-position-y: -16px;
+  background-position-y: -19px;
 }
 .Character[data-color="orange"] .Character_sprite {
-  background-position-y: -32px;
-}
-.Character[data-color="yellow"] .Character_sprite {
-  background-position-y: -48px;
-}
-.Character[data-color="green"] .Character_sprite {
-  background-position-y: -64px;
-}
-.Character[data-color="purple"] .Character_sprite {
-  background-position-y: -80px;
+  background-position-y: -38px;
 }
 .Character_shadow {
   background: url(/images/shadow.png) no-repeat no-repeat;
@@ -146,8 +143,12 @@ button:active {
   animation: coinFloat 0.8s linear infinite alternate-reverse;
 }
 @keyframes coinFloat {
-  from { transform: translateY(0) }
-  to { transform: translateY(5px) }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(5px);
+  }
 }
 .Coin_shadow {
   background: url(/images/coin-shadow.png) no-repeat no-repeat;

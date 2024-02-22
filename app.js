@@ -20,7 +20,7 @@ const mapData = {
 };
 
 // Options for Player Colors... these are in the same order as our sprite sheet
-const playerColors = ["blue", "red", "orange", "yellow", "green", "purple"];
+const playerColors = ["blue", "red", "orange"];
 
 //Misc Helpers
 function randomFromArray(array) {
@@ -114,6 +114,8 @@ function getRandomSafeSpot() {
   let playerId;
   let playerRef;
   let players = {};
+  let npcs = {};
+  let npcsElements = {};
   let playerElements = {};
   let coins = {};
   let coinElements = {};
@@ -166,10 +168,29 @@ function getRandomSafeSpot() {
   }
 
   function initGame() {
-    new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
-    new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
-    new KeyPressListener("ArrowLeft", () => handleArrowPress(-1, 0));
-    new KeyPressListener("ArrowRight", () => handleArrowPress(1, 0));
+    let keys = {};
+    let isProcessingKeyPress = false;
+
+    document.addEventListener("keydown", (event) => {
+      keys[event.key] = true;
+
+      if (!isProcessingKeyPress) {
+        isProcessingKeyPress = true;
+
+        if (keys["ArrowUp"]) handleArrowPress(0, -1);
+        if (keys["ArrowDown"]) handleArrowPress(0, 1);
+        if (keys["ArrowLeft"]) handleArrowPress(-1, 0);
+        if (keys["ArrowRight"]) handleArrowPress(1, 0);
+
+        setTimeout(() => {
+          isProcessingKeyPress = false;
+        }, 250);
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      keys[event.key] = false;
+    });
 
     const allPlayersRef = firebase.database().ref(`players`);
     const allCoinsRef = firebase.database().ref(`coins`);
@@ -285,7 +306,6 @@ function getRandomSafeSpot() {
   }
 
   firebase.auth().onAuthStateChanged((user) => {
-    console.log(user);
     if (user) {
       //You're logged in!
       playerId = user.uid;
