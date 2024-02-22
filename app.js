@@ -114,11 +114,11 @@ function getRandomSafeSpot() {
   let playerId;
   let playerRef;
   let players = {};
-  let npcs = {};
-  let npcsElements = {};
   let playerElements = {};
   let coins = {};
   let coinElements = {};
+  let npcs = {};
+  let npcsElements = {};
 
   const gameContainer = document.querySelector(".game-container");
   const playerNameInput = document.querySelector("#player-name");
@@ -136,6 +136,20 @@ function getRandomSafeSpot() {
     setTimeout(() => {
       placeCoin();
     }, randomFromArray(coinTimeouts));
+  }
+  // place the npcs
+  function placeNPC() {
+    const { x, y } = { x: 0, y: 11 };
+    const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
+    npcRef.set({
+      x,
+      y,
+    });
+
+    const npcTimeouts = [2000, 3000, 4000, 5000];
+    setTimeout(() => {
+      placeNPC();
+    }, randomFromArray(npcTimeouts));
   }
 
   function attemptGrabCoin(x, y) {
@@ -193,6 +207,7 @@ function getRandomSafeSpot() {
     });
 
     const allPlayersRef = firebase.database().ref(`players`);
+    const allNPCSRef = firebase.database().ref(`npcs`);
     const allCoinsRef = firebase.database().ref(`coins`);
 
     allPlayersRef.on("value", (snapshot) => {
@@ -276,6 +291,39 @@ function getRandomSafeSpot() {
       coinElements[key] = coinElement;
       gameContainer.appendChild(coinElement);
     });
+    // updating npc child based off coin implementation
+    allNPCSRef.on("value", (snapshot) => {
+      npcs = snapshot.val() || {};
+    });
+    allNPCSRef.on("child_added", (snapshot) => {
+      const npc = snapshot.val();
+      const key = getKeyString(npc.x, npc.y);
+      npcs[key] = true;
+
+      // Create the DOM Element
+      const npcElement = document.createElement("div");
+      npcElement.classList.add("NPC", "grid-cell");
+      npcElement.innerHTML = `
+        <div class="Npc_sprite grid-cell"></div>
+      `;
+
+      // Position the Element
+      const left = 16 * npc.x + "px";
+      const top = 16 * npc.y - 4 + "px";
+      npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+
+      // Keep a reference for removal later and add to DOM
+      npcsElements[key] = npcElement;
+      gameContainer.appendChild(npcElement);
+    });
+    // Remove npc from local state when Firebase `npcs` value updates
+    allNPCSRef.on("child_removed", (snapshot) => {
+      const { x, y } = snapshot.val();
+      const keyToRemove = getKeyString(x, y);
+      gameContainer.removeChild(npcsElements[keyToRemove]);
+      delete npcsElements[keyToRemove];
+    });
+
     allCoinsRef.on("child_removed", (snapshot) => {
       const { x, y } = snapshot.val();
       const keyToRemove = getKeyString(x, y);
@@ -303,6 +351,8 @@ function getRandomSafeSpot() {
 
     //Place my first coin
     placeCoin();
+    //Place NpC
+    placeNPC();
   }
 
   firebase.auth().onAuthStateChanged((user) => {

@@ -142,12 +142,27 @@ button:active {
   background: url(/images/coin.png) no-repeat no-repeat;
   animation: coinFloat 0.8s linear infinite alternate-reverse;
 }
+/* NPCS */
+.Npc_sprite {
+  background: url(/images/characters.png) no-repeat no-repeat;
+  animation: moveNPC 5s linear infinite alternate-reverse;
+}
+
 @keyframes coinFloat {
   from {
     transform: translateY(0);
   }
   to {
     transform: translateY(5px);
+  }
+}
+@keyframes moveNPC {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: rotateY("90");
+    transform: translatex(225px);
   }
 }
 .Coin_shadow {
