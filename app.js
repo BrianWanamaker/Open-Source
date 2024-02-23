@@ -441,7 +441,7 @@ function getRandomSafeSpot() {
 
     //Place my first coin
     placeCoin();
-    //Place NpC
+    //Place NPC
     placeNPC();
   }
 

@@ -81,7 +81,7 @@ button:active {
 .grid-cell {
   position: absolute;
   width: 16px;
-  height: 16px;
+  height: 19px;
 }
 .Character {
   transition: transform 0.4s;
@@ -155,10 +155,10 @@ button:active {
 }
 /* NPCS */
 .Npc_sprite {
-  background: url(/images/characters.png) no-repeat no-repeat;
+  background: url(/images/monkey_bgremoved.png) no-repeat no-repeat;
   background-position: 0 0;
-  width: 12px;
-  height: 19px;
+  width: 16px;
+  height: 16px;
   animation: moveNPC 5s linear infinite alternate-reverse;
 }
 
