@@ -150,6 +150,9 @@ button:active {
     transform: translateY(5px);
   }
 }
+.Coin_shadow {
+  background: url(/images/coin-shadow.png) no-repeat no-repeat;
+}
 /* NPCS */
 .Npc_sprite {
   background: url(/images/characters.png) no-repeat no-repeat;
@@ -164,12 +167,8 @@ button:active {
     transform: translateY(0);
   }
   to {
-    transform: rotateY("90");
     transform: translatex(225px);
   }
-}
-.Coin_shadow {
-  background: url(/images/coin-shadow.png) no-repeat no-repeat;
 }
 
 .Pizza_sprite {
