@@ -10,3 +10,4 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);

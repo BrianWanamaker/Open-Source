@@ -81,7 +81,7 @@ button:active {
 .grid-cell {
   position: absolute;
   width: 16px;
-  height: 19px;
+  height: 16px;
 }
 .Character {
   transition: transform 0.4s;
@@ -170,4 +170,41 @@ button:active {
 }
 .Coin_shadow {
   background: url(/images/coin-shadow.png) no-repeat no-repeat;
+}
+
+.Pizza_sprite {
+  background: url(/images/pizza-slice.png) no-repeat no-repeat;
+  width: 16px; /* or the actual width of your pizza image */
+  height: 16px; /* or the actual height of your pizza image */
+  background-size: contain; /* This ensures the image fits inside the element */
+  /* Adjust size if needed, and make sure the pizza.png is centered in the div */
+  /*border: 1px solid red; /* Just for debugging */
+  animation: pizzaFloat 0.8s linear infinite alternate-reverse;
+}
+
+@keyframes pizzaFloat {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(5px);
+  }
+}
+
+.Coffee_sprite {
+  background: url(/images/coffee.png) no-repeat no-repeat;
+  width: 16px; /* or the actual width of your pizza image */
+  height: 16px; /* or the actual height of your pizza image */
+  background-size: contain; /* This ensures the image fits inside the element */
+  /* Adjust size if needed, and make sure the pizza.png is centered in the div */
+  /*border: 1px solid red; /* Just for debugging */
+  animation: coffeeFloat 0.8s linear infinite alternate-reverse;
+}
+@keyframes coffeeFloat {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(5px);
+  }
 }

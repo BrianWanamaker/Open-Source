@@ -20,7 +20,7 @@ const mapData = {
 };
 
 // Options for Player Colors... these are in the same order as our sprite sheet
-const playerColors = ["blue", "red", "orange"];
+const playerColors = ["blue", "red", "orange", "yellow", "green", "purple"];
 
 //Misc Helpers
 function randomFromArray(array) {
@@ -119,10 +119,111 @@ function getRandomSafeSpot() {
   let coinElements = {};
   let npcs = {};
   let npcsElements = {};
+  // Global variables for pizza position
+  let pizzaX = 7; // Initial x position
+  let pizzaY = 7; // Initial y position
+
+  // Global variables for cofee position
+  let coffeeX = 7; // Initial x position
+  let coffeeY = 7; // Initial y position
 
   const gameContainer = document.querySelector(".game-container");
   const playerNameInput = document.querySelector("#player-name");
   const playerColorButton = document.querySelector("#player-color");
+
+  function placePizza() {
+    pizzaX = 11;
+    pizzaY = 4;
+
+    // Create the DOM Element for pizza
+    const pizzaElement = document.createElement("div");
+    pizzaElement.classList.add("Pizza", "grid-cell");
+    pizzaElement.innerHTML = `
+      <div class="Pizza_sprite grid-cell"></div>
+    `;
+
+    // Position the Element using your grid size (16x16 pixels assumed)
+    const left = 16 * pizzaX + "px";
+    const top = 16 * pizzaY + "px";
+    pizzaElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+
+    // Add to DOM
+    gameContainer.appendChild(pizzaElement);
+  }
+
+  function attemptGrabPizza(x, y) {
+    console.log(
+      `Player position: (${x},${y}), Pizza position: (${pizzaX},${pizzaY})`
+    );
+
+    if (x === pizzaX && y === pizzaY) {
+      console.log("Pizza picked up!");
+      removePizza();
+
+      // Show the pizza icon next to the player's name
+      const playerElement = playerElements[playerId];
+      if (playerElement) {
+        const pizzaIcon = playerElement.querySelector(".Character_pizza-icon");
+        if (pizzaIcon) {
+          pizzaIcon.style.display = "inline"; // Make the pizza icon visible
+        }
+      }
+    }
+  }
+
+  function removePizza() {
+    const pizzaElement = document.querySelector(".Pizza");
+    if (pizzaElement) {
+      gameContainer.removeChild(pizzaElement); // Remove the pizza element from its parent container
+    }
+  }
+
+  function placeCoffee() {
+    coffeeX = 3;
+    coffeeY = 4;
+
+    // Create the DOM Element for coffee
+    const coffeeElement = document.createElement("div");
+    coffeeElement.classList.add("Coffee", "grid-cell");
+    coffeeElement.innerHTML = `
+      <div class="Coffee_sprite grid-cell"></div>
+    `;
+
+    // Position the Element using your grid size (16x16 pixels assumed)
+    const left = 16 * coffeeX + "px";
+    const top = 16 * coffeeY + "px";
+    coffeeElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+
+    // Add to DOM
+    gameContainer.appendChild(coffeeElement);
+  }
+
+  function attemptGrabCoffee(x, y) {
+    if (x === coffeeX && y === coffeeY) {
+      console.log("Coffee picked up!");
+      removeCoffee(); // Function to remove the coffee from the game
+
+      // Show the coffee icon next to the player's name
+      const playerElement = playerElements[playerId];
+      if (playerElement) {
+        const coffeeIcon = playerElement.querySelector(
+          ".Character_coffee-icon"
+        );
+        if (coffeeIcon) {
+          coffeeIcon.style.display = "inline"; // Make the coffee icon visible
+        }
+      }
+    }
+  }
+  function removeCoffee() {
+    const coffeeElement = document.querySelector(".Coffee");
+    if (coffeeElement) {
+      gameContainer.removeChild(coffeeElement); // Remove the coffee element from its parent container
+    }
+  }
+
+  placeCoffee();
+  placePizza();
 
   function placeCoin() {
     const { x, y } = getRandomSafeSpot();
@@ -153,6 +254,7 @@ function getRandomSafeSpot() {
   }
 
   function attemptGrabCoin(x, y) {
+    console.log(` x=${players[playerId].x}, y=${players[playerId].y}`);
     const key = getKeyString(x, y);
     if (coins[key]) {
       // Remove this key from data, then uptick Player's coin count
@@ -178,33 +280,16 @@ function getRandomSafeSpot() {
       }
       playerRef.set(players[playerId]);
       attemptGrabCoin(newX, newY);
+      attemptGrabPizza(newX, newY);
+      attemptGrabCoffee(newX, newY);
     }
   }
 
   function initGame() {
-    let keys = {};
-    let isProcessingKeyPress = false;
-
-    document.addEventListener("keydown", (event) => {
-      keys[event.key] = true;
-
-      if (!isProcessingKeyPress) {
-        isProcessingKeyPress = true;
-
-        if (keys["ArrowUp"]) handleArrowPress(0, -1);
-        if (keys["ArrowDown"]) handleArrowPress(0, 1);
-        if (keys["ArrowLeft"]) handleArrowPress(-1, 0);
-        if (keys["ArrowRight"]) handleArrowPress(1, 0);
-
-        setTimeout(() => {
-          isProcessingKeyPress = false;
-        }, 250);
-      }
-    });
-
-    document.addEventListener("keyup", (event) => {
-      keys[event.key] = false;
-    });
+    new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
+    new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
+    new KeyPressListener("ArrowLeft", () => handleArrowPress(-1, 0));
+    new KeyPressListener("ArrowRight", () => handleArrowPress(1, 0));
 
     const allPlayersRef = firebase.database().ref(`players`);
     const allNPCSRef = firebase.database().ref(`npcs`);
@@ -240,6 +325,8 @@ function getRandomSafeSpot() {
         <div class="Character_name-container">
           <span class="Character_name"></span>
           <span class="Character_coins">0</span>
+          <span class="Character_pizza-icon" style="display: none;">🍕</span>
+          <span class="Character_coffee-icon" style="display: none;">☕️</span>
         </div>
         <div class="Character_you-arrow"></div>
       `;
@@ -264,10 +351,13 @@ function getRandomSafeSpot() {
       gameContainer.removeChild(playerElements[removedKey]);
       delete playerElements[removedKey];
     });
+
+    //New - not in the video!
     //This block will remove coins from local state when Firebase `coins` value updates
     allCoinsRef.on("value", (snapshot) => {
       coins = snapshot.val() || {};
     });
+    //
 
     allCoinsRef.on("child_added", (snapshot) => {
       const coin = snapshot.val();
@@ -356,6 +446,7 @@ function getRandomSafeSpot() {
   }
 
   firebase.auth().onAuthStateChanged((user) => {
+    console.log(user);
     if (user) {
       //You're logged in!
       playerId = user.uid;
@@ -392,7 +483,8 @@ function getRandomSafeSpot() {
     .catch((error) => {
       var errorCode = error.code;
       var errorMessage = error.message;
-
+      // ...
       console.log(errorCode, errorMessage);
     });
 })();
+//
