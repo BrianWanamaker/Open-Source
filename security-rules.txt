@@ -17,6 +17,9 @@ For example, any logged in player could currently delete all the coins in the ga
     },
     "coins": {
         ".write": "auth != null"
+    },
+    "npcs": {
+        ".write": "auth != null"
     }
   }
 }

@@ -81,8 +81,7 @@ button:active {
 .grid-cell {
   position: absolute;
   width: 16px;
-  height: 16px;
-  
+  height: 19px;
 }
 .Character {
   transition: transform 0.4s;
@@ -153,6 +152,23 @@ button:active {
 }
 .Coin_shadow {
   background: url(/images/coin-shadow.png) no-repeat no-repeat;
+}
+/* NPCS */
+.Npc_sprite {
+  background: url(/images/monkey_bgremoved.png) no-repeat no-repeat;
+  background-position: 0 0;
+  width: 16px;
+  height: 16px;
+  animation: moveNPC 5s linear infinite alternate-reverse;
+}
+
+@keyframes moveNPC {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translatex(225px);
+  }
 }
 
 .Pizza_sprite {
