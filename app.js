@@ -358,6 +358,9 @@ function getRandomSafeSpot() {
       coins = snapshot.val() || {};
     });
     //
+    allNPCSRef.on("value", (snapshot) => {
+      npcs = snapshot.val() || {};
+    });
 
     allCoinsRef.on("child_added", (snapshot) => {
       const coin = snapshot.val();
@@ -407,6 +410,12 @@ function getRandomSafeSpot() {
       gameContainer.appendChild(npcElement);
     });
     // Remove npc from local state when Firebase `npcs` value updates
+    allNPCSRef.on("child_removed", (snapshot) => {
+      const { x, y } = snapshot.val();
+      const keyToRemove = getKeyString(x, y);
+      gameContainer.removeChild(npcsElements[keyToRemove]);
+      delete npcsElements[keyToRemove];
+    });
     allNPCSRef.on("child_removed", (snapshot) => {
       const { x, y } = snapshot.val();
       const keyToRemove = getKeyString(x, y);
@@ -488,3 +497,14 @@ function getRandomSafeSpot() {
     });
 })();
 //
+
+document.addEventListener("DOMContentLoaded", (event) => {
+  const element = document.querySelector(".Npc_sprite");
+  if (element) {
+    element.addEventListener("animationend", function () {
+      this.style.display = "none";
+    });
+  } else {
+    console.log("Element .Npc_sprite not found");
+  }
+});
