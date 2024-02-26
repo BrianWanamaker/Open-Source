@@ -131,16 +131,95 @@ function getRandomSafeSpot() {
   const playerNameInput = document.querySelector("#player-name");
   const playerColorButton = document.querySelector("#player-color");
 
+  document.addEventListener('DOMContentLoaded', function () {
+    // Assuming you have your Firebase setup and placePizza/placeCoffee functions defined as before
+    const resetItemsButton = document.getElementById('resetItems');
+
+    resetItemsButton.addEventListener('click', function () {
+      // Reset pizza state in Firebase and then re-place pizza
+      const pizzaRef = firebase.database().ref('gameState/pizza');
+      pizzaRef.once('value').then((snapshot) => {
+        const pizzaState = snapshot.val();
+        if (pizzaState && pizzaState.pickedUp) {
+          pizzaRef.set({ pickedUp: false, by: null }).then(() => {
+            placePizza(); // Re-place pizza on the screen
+            // Hide pizza icons for all players
+            Object.keys(playerElements).forEach((playerId) => {
+              const pizzaIcon = playerElements[playerId].querySelector(".Character_pizza-icon");
+              if (pizzaIcon) {
+                pizzaIcon.style.display = "none";
+              }
+            });
+          });
+        }
+      });
+    
+      // Reset coffee state in Firebase and then re-place coffee
+      const coffeeRef = firebase.database().ref('gameState/coffee');
+      coffeeRef.once('value').then((snapshot) => {
+        const coffeeState = snapshot.val();
+        if (coffeeState && coffeeState.pickedUp) {
+          coffeeRef.set({ pickedUp: false, by: null }).then(() => {
+            placeCoffee(); // Re-place coffee on the screen
+            // Hide coffee icons for all players
+            Object.keys(playerElements).forEach((playerId) => {
+              const coffeeIcon = playerElements[playerId].querySelector(".Character_coffee-icon");
+              if (coffeeIcon) {
+                coffeeIcon.style.display = "none";
+              }
+            });
+          });
+        }
+      });
+    });
+    
+
+
+    // Your existing code to initialize the game, handle Firebase auth, etc.
+  });
+
+
+  // Adjusted function to place pizza only if not picked up
+  function checkAndPlacePizza() {
+    const pizzaRef = firebase.database().ref('gameState/pizza');
+    pizzaRef.once('value', (snapshot) => {
+      const pizzaState = snapshot.val();
+      if (!pizzaState || !pizzaState.pickedUp) {
+        placePizza();
+      }
+    });
+  }
+
+  // Adjusted function to place coffee only if not picked up
+  function checkAndPlaceCoffee() {
+    const coffeeRef = firebase.database().ref('gameState/coffee');
+    coffeeRef.once('value', (snapshot) => {
+      const coffeeState = snapshot.val();
+      if (!coffeeState || !coffeeState.pickedUp) {
+        placeCoffee();
+      }
+    });
+  }
+
+  // Call these functions instead of directly calling placePizza() and placeCoffee()
+  checkAndPlacePizza();
+  checkAndPlaceCoffee();
+
+
   function placePizza() {
+    // First, remove any existing pizza element
+    const existingPizzaElement = document.querySelector(".Pizza");
+    if (existingPizzaElement) {
+      gameContainer.removeChild(existingPizzaElement);
+    }
+
     pizzaX = 11;
     pizzaY = 4;
 
     // Create the DOM Element for pizza
     const pizzaElement = document.createElement("div");
     pizzaElement.classList.add("Pizza", "grid-cell");
-    pizzaElement.innerHTML = `
-      <div class="Pizza_sprite grid-cell"></div>
-    `;
+    pizzaElement.innerHTML = `<div class="Pizza_sprite grid-cell"></div>`;
 
     // Position the Element using your grid size (16x16 pixels assumed)
     const left = 16 * pizzaX + "px";
@@ -151,14 +230,18 @@ function getRandomSafeSpot() {
     gameContainer.appendChild(pizzaElement);
   }
 
+
   function attemptGrabPizza(x, y) {
     console.log(
       `Player position: (${x},${y}), Pizza position: (${pizzaX},${pizzaY})`
     );
 
     if (x === pizzaX && y === pizzaY) {
-      console.log("Pizza picked up!");
-      removePizza();
+
+
+      // Update Firebase to indicate pizza has been picked up
+      const pizzaRef = firebase.database().ref('gameState/pizza');
+      pizzaRef.set({ pickedUp: true, by: playerId });
 
       // Show the pizza icon next to the player's name
       const playerElement = playerElements[playerId];
@@ -171,23 +254,36 @@ function getRandomSafeSpot() {
     }
   }
 
+  const pizzaRef = firebase.database().ref('gameState/pizza');
+  pizzaRef.on('value', (snapshot) => {
+    const pizzaState = snapshot.val();
+    if (pizzaState && pizzaState.pickedUp) {
+      console.log(`Pizza picked up by ${pizzaState.by}`);
+      removePizza(); // Adjust this function to work when called in this context
+    }
+  });
+
+
   function removePizza() {
     const pizzaElement = document.querySelector(".Pizza");
     if (pizzaElement) {
       gameContainer.removeChild(pizzaElement); // Remove the pizza element from its parent container
     }
   }
-
   function placeCoffee() {
+    // First, remove any existing coffee element
+    const existingCoffeeElement = document.querySelector(".Coffee");
+    if (existingCoffeeElement) {
+      gameContainer.removeChild(existingCoffeeElement);
+    }
+
     coffeeX = 3;
     coffeeY = 4;
 
     // Create the DOM Element for coffee
     const coffeeElement = document.createElement("div");
     coffeeElement.classList.add("Coffee", "grid-cell");
-    coffeeElement.innerHTML = `
-      <div class="Coffee_sprite grid-cell"></div>
-    `;
+    coffeeElement.innerHTML = `<div class="Coffee_sprite grid-cell"></div>`;
 
     // Position the Element using your grid size (16x16 pixels assumed)
     const left = 16 * coffeeX + "px";
@@ -198,10 +294,14 @@ function getRandomSafeSpot() {
     gameContainer.appendChild(coffeeElement);
   }
 
+
   function attemptGrabCoffee(x, y) {
     if (x === coffeeX && y === coffeeY) {
-      console.log("Coffee picked up!");
-      removeCoffee(); // Function to remove the coffee from the game
+
+
+      // Update Firebase to indicate coffee has been picked up
+      const coffeeRef = firebase.database().ref('gameState/coffee');
+      coffeeRef.set({ pickedUp: true, by: playerId });
 
       // Show the coffee icon next to the player's name
       const playerElement = playerElements[playerId];
@@ -215,6 +315,18 @@ function getRandomSafeSpot() {
       }
     }
   }
+
+  const coffeeRef = firebase.database().ref('gameState/coffee');
+  coffeeRef.on('value', (snapshot) => {
+    const coffeeState = snapshot.val();
+    if (coffeeState && coffeeState.pickedUp) {
+      console.log(`Coffee picked up by ${coffeeState.by}`);
+      removeCoffee(); // Adjust this function to work when called in this context
+    } else {
+      placeCoffee(); // Make sure this doesn't duplicate coffees if called multiple times
+    }
+  });
+
   function removeCoffee() {
     const coffeeElement = document.querySelector(".Coffee");
     if (coffeeElement) {
@@ -222,8 +334,8 @@ function getRandomSafeSpot() {
     }
   }
 
-  placeCoffee();
-  placePizza();
+  // placeCoffee();
+  // placePizza();
 
   function placeCoin() {
     const { x, y } = getRandomSafeSpot();
@@ -448,6 +560,8 @@ function getRandomSafeSpot() {
       });
     });
 
+
+
     //Place my first coin
     placeCoin();
     //Place NPC
@@ -481,6 +595,8 @@ function getRandomSafeSpot() {
 
       //Begin the game now that we are signed in
       initGame();
+
+
     } else {
       //You're logged out.
     }
@@ -497,6 +613,9 @@ function getRandomSafeSpot() {
     });
 })();
 //
+
+
+
 
 document.addEventListener("DOMContentLoaded", (event) => {
   const element = document.querySelector(".Npc_sprite");
