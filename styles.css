@@ -155,7 +155,7 @@ button:active {
 }
 /* NPCS */
 .Npc_sprite {
-  background: url(/images/monkey_bgremoved.png) no-repeat no-repeat;
+  background: url(/images/right.gif) no-repeat no-repeat;
   background-position: 0 0;
   width: 16px;
   height: 16px;
