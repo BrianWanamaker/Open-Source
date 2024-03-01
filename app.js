@@ -599,49 +599,67 @@ function getRandomSafeSpot() {
       var errorMessage = error.message;
       console.log(errorCode, errorMessage);
     });
+
   // chat features
   function sendMessage(message, playerId) {
-    firebase
+    const messageRef = firebase
       .database()
-      .ref(`players/${playerId}/name`)
-      .once("value")
-      .then((snapshot) => {
-        const playerName = snapshot.val();
-        if (playerName) {
-          const chatRef = firebase.database().ref("chatMessages").push();
-          chatRef.set({
-            playerId,
-            playerName,
-            message,
-            timestamp: firebase.database.ServerValue.TIMESTAMP,
-          });
-        }
-      });
+      .ref(`players/${playerId}/messages`)
+      .push();
+    messageRef.set({
+      text: message,
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+    });
   }
-
+  //save chat messages to firebase
   document.addEventListener("DOMContentLoaded", (event) => {
     document.querySelector("#send-message").addEventListener("click", () => {
       const messageInput = document.querySelector("#chat-input");
       const message = messageInput.value.trim();
+      const MAX_LENGTH = 25;
+
+      if (message.length > MAX_LENGTH) {
+        alert(`Messages cannot be longer than ${MAX_LENGTH} characters.`);
+        return;
+      }
+
       if (message) {
         sendMessage(message, playerId);
         messageInput.value = "";
       }
     });
+    //displays old messages first
+    firebase
+      .database()
+      .ref("players")
+      .on("value", (snapshot) => {
+        const players = snapshot.val();
+        const allMessages = [];
+        Object.keys(players).forEach((playerId) => {
+          const player = players[playerId];
+          const messages = player.messages || {};
+
+          Object.keys(messages).forEach((messageId) => {
+            const message = messages[messageId];
+            allMessages.push({
+              text: message.text,
+              timestamp: message.timestamp,
+              playerName: player.name,
+            });
+          });
+        });
+
+        allMessages.sort((a, b) => a.timestamp - b.timestamp);
+        const chatMessagesContainer = document.querySelector("#chat-messages");
+        chatMessagesContainer.innerHTML = "";
+
+        allMessages.forEach((message) => {
+          const messageElement = document.createElement("div");
+          messageElement.textContent = `${message.playerName}: ${message.text}`;
+          chatMessagesContainer.appendChild(messageElement);
+        });
+
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+      });
   });
-
-  firebase
-    .database()
-    .ref("chatMessages")
-    .orderByChild("timestamp")
-    .limitToLast(20)
-    .on("child_added", (snapshot) => {
-      const messageData = snapshot.val();
-      const messageElement = document.createElement("div");
-      messageElement.textContent = `${messageData.playerName}: ${messageData.message}`;
-      document.querySelector("#chat-messages").appendChild(messageElement);
-
-      const chatMessages = document.querySelector("#chat-messages");
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
 })();
