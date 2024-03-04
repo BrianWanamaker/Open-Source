@@ -58,7 +58,7 @@ input[type="text"] {
   padding-left: 0.5em;
   border: 3px solid #222034;
   width: 150px;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
 }
 input[type="text"]:focus {
   border-color: #f000ff;
@@ -155,7 +155,7 @@ button:active {
 }
 /* NPCS */
 .Npc_sprite {
-  background: url(/images/monkey_bgremoved.png) no-repeat no-repeat;
+  background: url(/images/right.gif) no-repeat no-repeat;
   background-position: 0 0;
   width: 16px;
   height: 16px;
@@ -206,4 +206,33 @@ button:active {
   to {
     transform: translateY(5px);
   }
+}
+/* chatbox */
+#chat-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 300px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+#chat-messages {
+  height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+#chat-input {
+  width: 99%;
+  padding: 20px;
+  margin-bottom: 5px;
+}
+
+#send-message {
+  padding: 5px;
 }

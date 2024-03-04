@@ -131,21 +131,23 @@ function getRandomSafeSpot() {
   const playerNameInput = document.querySelector("#player-name");
   const playerColorButton = document.querySelector("#player-color");
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener("DOMContentLoaded", function () {
     // Assuming you have your Firebase setup and placePizza/placeCoffee functions defined as before
-    const resetItemsButton = document.getElementById('resetItems');
+    const resetItemsButton = document.getElementById("resetItems");
 
-    resetItemsButton.addEventListener('click', function () {
+    resetItemsButton.addEventListener("click", function () {
       // Reset pizza state in Firebase and then re-place pizza
-      const pizzaRef = firebase.database().ref('gameState/pizza');
-      pizzaRef.once('value').then((snapshot) => {
+      const pizzaRef = firebase.database().ref("gameState/pizza");
+      pizzaRef.once("value").then((snapshot) => {
         const pizzaState = snapshot.val();
         if (pizzaState && pizzaState.pickedUp) {
           pizzaRef.set({ pickedUp: false, by: null }).then(() => {
             placePizza(); // Re-place pizza on the screen
             // Hide pizza icons for all players
             Object.keys(playerElements).forEach((playerId) => {
-              const pizzaIcon = playerElements[playerId].querySelector(".Character_pizza-icon");
+              const pizzaIcon = playerElements[playerId].querySelector(
+                ".Character_pizza-icon"
+              );
               if (pizzaIcon) {
                 pizzaIcon.style.display = "none";
               }
@@ -153,17 +155,19 @@ function getRandomSafeSpot() {
           });
         }
       });
-    
+
       // Reset coffee state in Firebase and then re-place coffee
-      const coffeeRef = firebase.database().ref('gameState/coffee');
-      coffeeRef.once('value').then((snapshot) => {
+      const coffeeRef = firebase.database().ref("gameState/coffee");
+      coffeeRef.once("value").then((snapshot) => {
         const coffeeState = snapshot.val();
         if (coffeeState && coffeeState.pickedUp) {
           coffeeRef.set({ pickedUp: false, by: null }).then(() => {
             placeCoffee(); // Re-place coffee on the screen
             // Hide coffee icons for all players
             Object.keys(playerElements).forEach((playerId) => {
-              const coffeeIcon = playerElements[playerId].querySelector(".Character_coffee-icon");
+              const coffeeIcon = playerElements[playerId].querySelector(
+                ".Character_coffee-icon"
+              );
               if (coffeeIcon) {
                 coffeeIcon.style.display = "none";
               }
@@ -172,17 +176,14 @@ function getRandomSafeSpot() {
         }
       });
     });
-    
-
 
     // Your existing code to initialize the game, handle Firebase auth, etc.
   });
 
-
   // Adjusted function to place pizza only if not picked up
   function checkAndPlacePizza() {
-    const pizzaRef = firebase.database().ref('gameState/pizza');
-    pizzaRef.once('value', (snapshot) => {
+    const pizzaRef = firebase.database().ref("gameState/pizza");
+    pizzaRef.once("value", (snapshot) => {
       const pizzaState = snapshot.val();
       if (!pizzaState || !pizzaState.pickedUp) {
         placePizza();
@@ -192,8 +193,8 @@ function getRandomSafeSpot() {
 
   // Adjusted function to place coffee only if not picked up
   function checkAndPlaceCoffee() {
-    const coffeeRef = firebase.database().ref('gameState/coffee');
-    coffeeRef.once('value', (snapshot) => {
+    const coffeeRef = firebase.database().ref("gameState/coffee");
+    coffeeRef.once("value", (snapshot) => {
       const coffeeState = snapshot.val();
       if (!coffeeState || !coffeeState.pickedUp) {
         placeCoffee();
@@ -204,7 +205,6 @@ function getRandomSafeSpot() {
   // Call these functions instead of directly calling placePizza() and placeCoffee()
   checkAndPlacePizza();
   checkAndPlaceCoffee();
-
 
   function placePizza() {
     // First, remove any existing pizza element
@@ -230,17 +230,14 @@ function getRandomSafeSpot() {
     gameContainer.appendChild(pizzaElement);
   }
 
-
   function attemptGrabPizza(x, y) {
     console.log(
       `Player position: (${x},${y}), Pizza position: (${pizzaX},${pizzaY})`
     );
 
     if (x === pizzaX && y === pizzaY) {
-
-
       // Update Firebase to indicate pizza has been picked up
-      const pizzaRef = firebase.database().ref('gameState/pizza');
+      const pizzaRef = firebase.database().ref("gameState/pizza");
       pizzaRef.set({ pickedUp: true, by: playerId });
 
       // Show the pizza icon next to the player's name
@@ -254,15 +251,14 @@ function getRandomSafeSpot() {
     }
   }
 
-  const pizzaRef = firebase.database().ref('gameState/pizza');
-  pizzaRef.on('value', (snapshot) => {
+  const pizzaRef = firebase.database().ref("gameState/pizza");
+  pizzaRef.on("value", (snapshot) => {
     const pizzaState = snapshot.val();
     if (pizzaState && pizzaState.pickedUp) {
       console.log(`Pizza picked up by ${pizzaState.by}`);
       removePizza(); // Adjust this function to work when called in this context
     }
   });
-
 
   function removePizza() {
     const pizzaElement = document.querySelector(".Pizza");
@@ -294,13 +290,10 @@ function getRandomSafeSpot() {
     gameContainer.appendChild(coffeeElement);
   }
 
-
   function attemptGrabCoffee(x, y) {
     if (x === coffeeX && y === coffeeY) {
-
-
       // Update Firebase to indicate coffee has been picked up
-      const coffeeRef = firebase.database().ref('gameState/coffee');
+      const coffeeRef = firebase.database().ref("gameState/coffee");
       coffeeRef.set({ pickedUp: true, by: playerId });
 
       // Show the coffee icon next to the player's name
@@ -316,8 +309,8 @@ function getRandomSafeSpot() {
     }
   }
 
-  const coffeeRef = firebase.database().ref('gameState/coffee');
-  coffeeRef.on('value', (snapshot) => {
+  const coffeeRef = firebase.database().ref("gameState/coffee");
+  coffeeRef.on("value", (snapshot) => {
     const coffeeState = snapshot.val();
     if (coffeeState && coffeeState.pickedUp) {
       console.log(`Coffee picked up by ${coffeeState.by}`);
@@ -560,8 +553,6 @@ function getRandomSafeSpot() {
       });
     });
 
-
-
     //Place my first coin
     placeCoin();
     //Place NPC
@@ -595,8 +586,6 @@ function getRandomSafeSpot() {
 
       //Begin the game now that we are signed in
       initGame();
-
-
     } else {
       //You're logged out.
     }
@@ -608,22 +597,69 @@ function getRandomSafeSpot() {
     .catch((error) => {
       var errorCode = error.code;
       var errorMessage = error.message;
-      // ...
       console.log(errorCode, errorMessage);
     });
-})();
-//
 
-
-
-
-document.addEventListener("DOMContentLoaded", (event) => {
-  const element = document.querySelector(".Npc_sprite");
-  if (element) {
-    element.addEventListener("animationend", function () {
-      this.style.display = "none";
+  // chat features
+  function sendMessage(message, playerId) {
+    const messageRef = firebase
+      .database()
+      .ref(`players/${playerId}/messages`)
+      .push();
+    messageRef.set({
+      text: message,
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
     });
-  } else {
-    console.log("Element .Npc_sprite not found");
   }
-});
+  //save chat messages to firebase
+  document.addEventListener("DOMContentLoaded", (event) => {
+    document.querySelector("#send-message").addEventListener("click", () => {
+      const messageInput = document.querySelector("#chat-input");
+      const message = messageInput.value.trim();
+      const MAX_LENGTH = 25;
+
+      if (message.length > MAX_LENGTH) {
+        alert(`Messages cannot be longer than ${MAX_LENGTH} characters.`);
+        return;
+      }
+
+      if (message) {
+        sendMessage(message, playerId);
+        messageInput.value = "";
+      }
+    });
+    //displays old messages first
+    firebase
+      .database()
+      .ref("players")
+      .on("value", (snapshot) => {
+        const players = snapshot.val();
+        const allMessages = [];
+        Object.keys(players).forEach((playerId) => {
+          const player = players[playerId];
+          const messages = player.messages || {};
+
+          Object.keys(messages).forEach((messageId) => {
+            const message = messages[messageId];
+            allMessages.push({
+              text: message.text,
+              timestamp: message.timestamp,
+              playerName: player.name,
+            });
+          });
+        });
+
+        allMessages.sort((a, b) => a.timestamp - b.timestamp);
+        const chatMessagesContainer = document.querySelector("#chat-messages");
+        chatMessagesContainer.innerHTML = "";
+
+        allMessages.forEach((message) => {
+          const messageElement = document.createElement("div");
+          messageElement.textContent = `${message.playerName}: ${message.text}`;
+          chatMessagesContainer.appendChild(messageElement);
+        });
+
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+      });
+  });
+})();
