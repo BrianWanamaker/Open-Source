@@ -58,7 +58,7 @@ input[type="text"] {
   padding-left: 0.5em;
   border: 3px solid #222034;
   width: 150px;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
 }
 input[type="text"]:focus {
   border-color: #f000ff;
@@ -207,7 +207,7 @@ button:active {
     transform: translateY(5px);
   }
 }
-/* chat */
+/* chatbox */
 #chat-container {
   position: absolute;
   top: 10px;
