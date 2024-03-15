@@ -162,15 +162,6 @@ button:active {
   animation: moveNPC 5s linear infinite alternate-reverse;
 }
 
-@keyframes moveNPC {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translatex(225px);
-  }
-}
-
 .Pizza_sprite {
   background: url(/images/pizza-slice.png) no-repeat no-repeat;
   width: 16px; /* or the actual width of your pizza image */

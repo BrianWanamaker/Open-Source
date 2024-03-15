@@ -344,19 +344,65 @@ function getRandomSafeSpot() {
     }, randomFromArray(coinTimeouts));
   }
   // place the npcs
-  function placeNPC() {
-    const { x, y } = { x: 0, y: 11 };
-    const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
+  let npcCounter = 0; // Simple counter to generate unique IDs for NPCs
+
+  function generateNpcId() {
+    npcCounter += 1;
+    return `npc${npcCounter}`; // Generates npc1, npc2, npc3, etc.
+  }
+
+  function spawnAndMoveNPCs() {
+    const npcId = generateNpcId(); // Unique ID for each NPC
+    const spawnLeft = Math.random() < 0.5; // Randomly decide spawn side
+    let x = spawnLeft ? 1 : 12;
+    let y = 11; // Fixed y-coordinate for simplicity
+    let direction = spawnLeft ? "right" : "left";
+
+    // Initial NPC setup in Firebase
+    const npcRef = firebase.database().ref(`npcs/${npcId}`);
     npcRef.set({
       x,
       y,
+      direction,
     });
 
-    const npcTimeouts = [2000, 3000, 4000, 5000];
-    setTimeout(() => {
-      placeNPC();
-    }, randomFromArray(npcTimeouts));
+    function moveNPC() {
+      // Update x based on direction
+      direction === "right" ? (x += 1) : (x -= 1);
+
+      // Check bounds and delete or update NPC
+      if (x < 1 || x > 12) {
+        // NPC has crossed the boundary, remove it
+        npcRef.remove();
+      } else {
+        // Update NPC's position in Firebase
+        npcRef.update({ x }); // No need to update y or direction here
+      }
+
+      // Schedule next move if NPC is still within bounds
+      if (x >= 1 && x <= 12) {
+        const moveNPCTimeouts = [2000, 3000, 4000, 5000];
+        setTimeout(moveNPC, randomFromArray(moveNPCTimeouts));
+      }
+    }
+
+    // Start moving the NPC
+    moveNPC();
   }
+
+  // To spawn multiple NPCs, simply call spawnAndMoveNPCs() multiple times
+  function startNpcSpawning() {
+    const spawnIntervals = [5000, 10000, 15000]; // Example spawn intervals
+    spawnAndMoveNPCs(); // Initial spawn
+
+    // Additional NPCs spawning at different intervals
+    spawnIntervals.forEach((interval) => {
+      setTimeout(spawnAndMoveNPCs, interval);
+    });
+  }
+
+  // Call startNpcSpawning to begin the process
+  startNpcSpawning();
 
   function attemptGrabCoin(x, y) {
     console.log(` x=${players[playerId].x}, y=${players[playerId].y}`);
@@ -514,19 +560,55 @@ function getRandomSafeSpot() {
       npcsElements[key] = npcElement;
       gameContainer.appendChild(npcElement);
     });
-    // Remove npc from local state when Firebase `npcs` value updates
-    allNPCSRef.on("child_removed", (snapshot) => {
-      const { x, y } = snapshot.val();
-      const keyToRemove = getKeyString(x, y);
-      gameContainer.removeChild(npcsElements[keyToRemove]);
-      delete npcsElements[keyToRemove];
+    const npcsRef = firebase.database().ref("npcs");
+
+    // Listen for NPC additions
+    npcsRef.on("child_added", (snapshot) => {
+      console.log("NPC Added:", snapshot.key, snapshot.val());
+      const npcId = snapshot.key;
+      const npcData = snapshot.val();
+      createOrUpdateNpcElement(npcId, npcData);
     });
-    allNPCSRef.on("child_removed", (snapshot) => {
-      const { x, y } = snapshot.val();
-      const keyToRemove = getKeyString(x, y);
-      gameContainer.removeChild(npcsElements[keyToRemove]);
-      delete npcsElements[keyToRemove];
+
+    // Listen for NPC updates
+    npcsRef.on("child_changed", (snapshot) => {
+      console.log("NPC Changed:", snapshot.key, snapshot.val());
+      const npcId = snapshot.key;
+      const npcData = snapshot.val();
+      createOrUpdateNpcElement(npcId, npcData);
     });
+
+    // Listen for NPC removals
+    npcsRef.on("child_removed", (snapshot) => {
+      console.log("NPC Removed:", snapshot.key);
+      const npcId = snapshot.key;
+      removeNpcElement(npcId);
+    });
+
+    function createOrUpdateNpcElement(npcId, npcData) {
+      let npcElement = document.getElementById(npcId);
+      if (!npcElement) {
+        // If the NPC element does not exist, create it
+        npcElement = document.createElement("div");
+        npcElement.id = npcId;
+        npcElement.classList.add("NPC");
+        document.querySelector(".game-container").appendChild(npcElement);
+      }
+
+      // Update the NPC's position
+      const left = 16 * npcData.x + "px"; // Assuming your grid cell size is 16x16
+      const top = 16 * npcData.y + "px";
+      npcElement.style.position = "absolute"; // Ensure your NPCs are positioned absolutely within the game container
+      npcElement.style.left = left;
+      npcElement.style.top = top;
+    }
+
+    function removeNpcElement(npcId) {
+      const npcElement = document.getElementById(npcId);
+      if (npcElement) {
+        npcElement.parentNode.removeChild(npcElement);
+      }
+    }
 
     allCoinsRef.on("child_removed", (snapshot) => {
       const { x, y } = snapshot.val();
@@ -556,7 +638,7 @@ function getRandomSafeSpot() {
     //Place my first coin
     placeCoin();
     //Place NPC
-    placeNPC();
+    spawnAndMoveNPCs();
   }
 
   firebase.auth().onAuthStateChanged((user) => {
