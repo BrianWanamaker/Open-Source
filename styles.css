@@ -156,10 +156,10 @@ button:active {
 /* NPCS */
 .Npc_sprite {
   background: url(/images/right.gif) no-repeat no-repeat;
-  background-position: 0 0;
+  /* background-position: 0 0; */
   width: 16px;
   height: 16px;
-  animation: moveNPC 5s linear infinite alternate-reverse;
+  /* animation: moveNPC 5s linear infinite alternate-reverse; */
 }
 
 .Pizza_sprite {
