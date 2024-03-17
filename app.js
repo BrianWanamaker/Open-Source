@@ -345,13 +345,14 @@ function getRandomSafeSpot() {
   }
   // place the npcs
   function placeAndMoveNPC() {
-    //  bottom left (2,11) or bottom right (12,11)
+    // Decide starting position: bottom left (2,11) or bottom right (12,11)
     let startPosition =
       Math.random() < 0.5 ? { x: 2, y: 11 } : { x: 12, y: 11 };
     let { x, y } = startPosition;
 
-    let direction = x === 2 ? "right" : "left";
+    let direction = x === 2 ? "right" : "left"; // Move right if starting from the left, left if from the right
 
+    // Initial NPC Reference in Firebase
     const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
     npcRef.set({
       x,
@@ -359,38 +360,63 @@ function getRandomSafeSpot() {
       direction,
     });
 
-    // check if NPC is at edge and remove it
-    const checkAndRemoveAtEdge = (x, y) => {
-      if (x <= mapData.minX || x >= mapData.maxX) {
-        const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
-        npcRef.remove();
-        return true;
-      }
-      return false;
-    };
-
-    const moveNPCTimeouts = [2000, 3000];
-    setTimeout(function moveNPC() {
-      if (!checkAndRemoveAtEdge(x, y)) {
-        const oldKey = getKeyString(x, y);
-
-        if (direction === "right") {
-          x = x + 1;
-        } else {
-          x = x - 1;
+    function makeMove() {
+      // Check if NPC is directly beneath the table and if it should move towards it
+      if (x === 7 && y > 9) {
+        if (Math.random() < 0.2) {
+          // 1 in 5 chance to move up
+          y--; // Move one step up
+          direction = "up";
+          updateNPCPosition(x, y, direction);
+          if (y === 9) {
+            // NPC is now sitting at the table, so it won't move further
+            return;
+          }
         }
-
-        if (!checkAndRemoveAtEdge(x, y)) {
-          const newKey = getKeyString(x, y);
-          const npcMoveRef = firebase.database().ref(`npcs/${newKey}`);
-          npcMoveRef.set({ x, y, direction });
-
-          firebase.database().ref(`npcs/${oldKey}`).remove();
-
-          setTimeout(moveNPC, randomFromArray(moveNPCTimeouts));
-        }
+      } else if (direction === "right" && x < 7) {
+        x++;
+        updateNPCPosition(x, y, direction);
+      } else if (direction === "left" && x > 7) {
+        x--;
+        updateNPCPosition(x, y, direction);
       }
-    }, randomFromArray(moveNPCTimeouts));
+
+      // Schedule the next move
+      const moveNPCTimeouts = [1000, 1500];
+      setTimeout(makeMove, randomFromArray(moveNPCTimeouts));
+    }
+
+    // Start the NPC movement
+    makeMove();
+  }
+
+  function updateNPCPosition(x, y, direction, sitting = false) {
+    const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
+    npcRef.set({ x, y, direction }); // Update NPC position in Firebase
+
+    // Determine the old key for the position from which the NPC is moving
+    let oldX = x;
+    let oldY = y;
+    switch (direction) {
+      case "right":
+        oldX = x - 1;
+        break;
+      case "left":
+        oldX = x + 1;
+        break;
+      case "up":
+        oldY = y + 1;
+        break;
+      case "down":
+        oldY = y - 1;
+        break;
+    }
+
+    const oldKey = getKeyString(oldX, oldY);
+    if (!sitting && oldKey !== getKeyString(x, y)) {
+      // Remove old NPC position from Firebase, only if not sitting
+      firebase.database().ref(`npcs/${oldKey}`).remove();
+    }
   }
 
   function attemptGrabCoin(x, y) {
