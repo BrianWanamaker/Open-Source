@@ -196,6 +196,18 @@ button:active {
   background-image: url(images/up_yellow.gif);
 }
 
+.NPC[data-color="blue"][data-direction="sitting"] .Npc_sprite {
+  background-image: url("/images/sitting_blue.gif");
+}
+
+.NPC[data-color="green"][data-direction="sitting"] .Npc_sprite {
+  background-image: url("/images/sitting.gif");
+}
+
+.NPC[data-color="yellow"][data-direction="sitting"] .Npc_sprite {
+  background-image: url("/images/sitting_yellow.gif");
+}
+
 .Pizza_sprite {
   background: url(/images/pizza-slice.png) no-repeat no-repeat;
   width: 16px; /* or the actual width of your pizza image */
