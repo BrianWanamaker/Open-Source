@@ -119,6 +119,7 @@ function getRandomSafeSpot() {
   let coinElements = {};
   let npcs = {};
   let npcsElements = {};
+  const npcColors = ["yellow", "green", "blue"];
   // Global variables for pizza position
   let pizzaX = 7; // Initial x position
   let pizzaY = 7; // Initial y position
@@ -231,10 +232,6 @@ function getRandomSafeSpot() {
   }
 
   function attemptGrabPizza(x, y) {
-    console.log(
-      `Player position: (${x},${y}), Pizza position: (${pizzaX},${pizzaY})`
-    );
-
     if (x === pizzaX && y === pizzaY) {
       // Update Firebase to indicate pizza has been picked up
       const pizzaRef = firebase.database().ref("gameState/pizza");
@@ -255,7 +252,6 @@ function getRandomSafeSpot() {
   pizzaRef.on("value", (snapshot) => {
     const pizzaState = snapshot.val();
     if (pizzaState && pizzaState.pickedUp) {
-      console.log(`Pizza picked up by ${pizzaState.by}`);
       removePizza(); // Adjust this function to work when called in this context
     }
   });
@@ -313,7 +309,6 @@ function getRandomSafeSpot() {
   coffeeRef.on("value", (snapshot) => {
     const coffeeState = snapshot.val();
     if (coffeeState && coffeeState.pickedUp) {
-      console.log(`Coffee picked up by ${coffeeState.by}`);
       removeCoffee(); // Adjust this function to work when called in this context
     } else {
       placeCoffee(); // Make sure this doesn't duplicate coffees if called multiple times
@@ -344,22 +339,91 @@ function getRandomSafeSpot() {
     }, randomFromArray(coinTimeouts));
   }
   // place the npcs
-  function placeNPC() {
-    const { x, y } = { x: 0, y: 11 };
+
+  function placeAndMoveNPC() {
+    let npcColor = randomFromArray(npcColors);
+    // bottom left (2,11) or bottom right (12,11)
+    let startPosition = { x: 2, y: 11 };
+    let { x, y } = startPosition;
+
+    let direction = "right";
     const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
     npcRef.set({
       x,
       y,
+      direction,
+      color: npcColor,
     });
 
-    const npcTimeouts = [2000, 3000, 4000, 5000];
-    setTimeout(() => {
-      placeNPC();
-    }, randomFromArray(npcTimeouts));
+    function makeMove() {
+      let direction = "right";
+
+      const tableX = 7;
+      const tableY = 9;
+      if (x === tableX && y === tableY) {
+        direction = "sitting";
+        updateNPCPosition(x, y, direction, npcColor);
+        return;
+      }
+
+      if (x === 7 && y > 9) {
+        if (Math.random() < 0.9) {
+          // chance to move up to table(90% for testing purposes)
+          y--;
+          direction = "up";
+          updateNPCPosition(x, y, direction, npcColor);
+          if (y === 9) {
+            return;
+          }
+        }
+      } else if (direction === "right" && x < 7) {
+        x++;
+        updateNPCPosition(x, y, direction, npcColor);
+      } else if (direction === "left" && x > 7) {
+        x--;
+        updateNPCPosition(x, y, direction, npcColor);
+      }
+      const moveNPCTimeouts = [1000, 1500];
+      setTimeout(makeMove, randomFromArray(moveNPCTimeouts));
+    }
+    makeMove();
+  }
+
+  function updateNPCPosition(x, y, direction, color) {
+    const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
+    npcRef.set({ x, y, direction, color });
+
+    // Update the direction attribute in the NPC element
+    const npcElement = npcsElements[getKeyString(x, y)];
+    if (npcElement) {
+      npcElement.setAttribute("data-direction", direction);
+    }
+    let oldX = x,
+      oldY = y;
+    switch (direction) {
+      case "right":
+        oldX -= 1;
+        break;
+      case "left":
+        oldX += 1;
+        break;
+      case "up":
+        oldY += 1;
+        break;
+      case "down":
+        oldY -= 1;
+        break;
+      case "sitting":
+        break;
+    }
+
+    const oldKey = getKeyString(oldX, oldY);
+    if (direction !== "sitting" && oldKey !== getKeyString(x, y)) {
+      firebase.database().ref(`npcs/${oldKey}`).remove();
+    }
   }
 
   function attemptGrabCoin(x, y) {
-    console.log(` x=${players[playerId].x}, y=${players[playerId].y}`);
     const key = getKeyString(x, y);
     if (coins[key]) {
       // Remove this key from data, then uptick Player's coin count
@@ -489,7 +553,7 @@ function getRandomSafeSpot() {
       coinElements[key] = coinElement;
       gameContainer.appendChild(coinElement);
     });
-    // updating npc child based off coin implementation
+
     allNPCSRef.on("value", (snapshot) => {
       npcs = snapshot.val() || {};
     });
@@ -498,34 +562,34 @@ function getRandomSafeSpot() {
       const key = getKeyString(npc.x, npc.y);
       npcs[key] = true;
 
-      // Create the DOM Element
       const npcElement = document.createElement("div");
       npcElement.classList.add("NPC", "grid-cell");
+      npcElement.setAttribute("data-color", npc.color);
       npcElement.innerHTML = `
         <div class="Npc_sprite grid-cell"></div>
       `;
 
-      // Position the Element
       const left = 16 * npc.x + "px";
       const top = 16 * npc.y - 4 + "px";
       npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
 
-      // Keep a reference for removal later and add to DOM
       npcsElements[key] = npcElement;
       gameContainer.appendChild(npcElement);
     });
-    // Remove npc from local state when Firebase `npcs` value updates
     allNPCSRef.on("child_removed", (snapshot) => {
       const { x, y } = snapshot.val();
       const keyToRemove = getKeyString(x, y);
-      gameContainer.removeChild(npcsElements[keyToRemove]);
-      delete npcsElements[keyToRemove];
-    });
-    allNPCSRef.on("child_removed", (snapshot) => {
-      const { x, y } = snapshot.val();
-      const keyToRemove = getKeyString(x, y);
-      gameContainer.removeChild(npcsElements[keyToRemove]);
-      delete npcsElements[keyToRemove];
+      const npcElement = npcsElements[keyToRemove];
+
+      if (npcElement && npcElement.parentNode) {
+        npcElement.parentNode.removeChild(npcElement);
+        delete npcsElements[keyToRemove];
+      } else {
+        console.error(
+          "NPC Element not found or already removed for key:",
+          keyToRemove
+        );
+      }
     });
 
     allCoinsRef.on("child_removed", (snapshot) => {
@@ -556,11 +620,10 @@ function getRandomSafeSpot() {
     //Place my first coin
     placeCoin();
     //Place NPC
-    placeNPC();
+    placeAndMoveNPC();
   }
 
   firebase.auth().onAuthStateChanged((user) => {
-    console.log(user);
     if (user) {
       //You're logged in!
       playerId = user.uid;
