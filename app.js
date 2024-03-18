@@ -119,6 +119,7 @@ function getRandomSafeSpot() {
   let coinElements = {};
   let npcs = {};
   let npcsElements = {};
+  const npcColors = ["yellow", "green", "blue"];
   // Global variables for pizza position
   let pizzaX = 7; // Initial x position
   let pizzaY = 7; // Initial y position
@@ -231,10 +232,6 @@ function getRandomSafeSpot() {
   }
 
   function attemptGrabPizza(x, y) {
-    console.log(
-      `Player position: (${x},${y}), Pizza position: (${pizzaX},${pizzaY})`
-    );
-
     if (x === pizzaX && y === pizzaY) {
       // Update Firebase to indicate pizza has been picked up
       const pizzaRef = firebase.database().ref("gameState/pizza");
@@ -255,7 +252,6 @@ function getRandomSafeSpot() {
   pizzaRef.on("value", (snapshot) => {
     const pizzaState = snapshot.val();
     if (pizzaState && pizzaState.pickedUp) {
-      console.log(`Pizza picked up by ${pizzaState.by}`);
       removePizza(); // Adjust this function to work when called in this context
     }
   });
@@ -313,7 +309,6 @@ function getRandomSafeSpot() {
   coffeeRef.on("value", (snapshot) => {
     const coffeeState = snapshot.val();
     if (coffeeState && coffeeState.pickedUp) {
-      console.log(`Coffee picked up by ${coffeeState.by}`);
       removeCoffee(); // Adjust this function to work when called in this context
     } else {
       placeCoffee(); // Make sure this doesn't duplicate coffees if called multiple times
@@ -344,18 +339,20 @@ function getRandomSafeSpot() {
     }, randomFromArray(coinTimeouts));
   }
   // place the npcs
+
   function placeAndMoveNPC() {
+    let npcColor = randomFromArray(npcColors);
     // bottom left (2,11) or bottom right (12,11)
     let startPosition = { x: 2, y: 11 };
     let { x, y } = startPosition;
 
     let direction = "right";
-
     const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
     npcRef.set({
       x,
       y,
       direction,
+      color: npcColor,
     });
 
     function makeMove() {
@@ -363,10 +360,9 @@ function getRandomSafeSpot() {
 
       const tableX = 7;
       const tableY = 9;
-
       if (x === tableX && y === tableY) {
         direction = "sitting";
-        updateNPCPosition(npcId, x, y, direction);
+        updateNPCPosition(x, y, direction, npcColor);
         return;
       }
 
@@ -375,17 +371,17 @@ function getRandomSafeSpot() {
           // chance to move up to table(90% for testing purposes)
           y--;
           direction = "up";
-          updateNPCPosition(x, y, direction);
+          updateNPCPosition(x, y, direction, npcColor);
           if (y === 9) {
             return;
           }
         }
       } else if (direction === "right" && x < 7) {
         x++;
-        updateNPCPosition(x, y, direction);
+        updateNPCPosition(x, y, direction, npcColor);
       } else if (direction === "left" && x > 7) {
         x--;
-        updateNPCPosition(x, y, direction);
+        updateNPCPosition(x, y, direction, npcColor);
       }
       const moveNPCTimeouts = [1000, 1500];
       setTimeout(makeMove, randomFromArray(moveNPCTimeouts));
@@ -393,9 +389,9 @@ function getRandomSafeSpot() {
     makeMove();
   }
 
-  function updateNPCPosition(x, y, direction, sitting = false) {
+  function updateNPCPosition(x, y, direction, color) {
     const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
-    npcRef.set({ x, y, direction });
+    npcRef.set({ x, y, direction, color });
 
     // Update the direction attribute in the NPC element
     const npcElement = npcsElements[getKeyString(x, y)];
@@ -428,7 +424,6 @@ function getRandomSafeSpot() {
   }
 
   function attemptGrabCoin(x, y) {
-    console.log(` x=${players[playerId].x}, y=${players[playerId].y}`);
     const key = getKeyString(x, y);
     if (coins[key]) {
       // Remove this key from data, then uptick Player's coin count
@@ -569,6 +564,7 @@ function getRandomSafeSpot() {
 
       const npcElement = document.createElement("div");
       npcElement.classList.add("NPC", "grid-cell");
+      npcElement.setAttribute("data-color", npc.color);
       npcElement.innerHTML = `
         <div class="Npc_sprite grid-cell"></div>
       `;
@@ -628,7 +624,6 @@ function getRandomSafeSpot() {
   }
 
   firebase.auth().onAuthStateChanged((user) => {
-    console.log(user);
     if (user) {
       //You're logged in!
       playerId = user.uid;
