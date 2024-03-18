@@ -362,19 +362,20 @@ function getRandomSafeSpot() {
       const tableY = 9;
       if (x === tableX && y === tableY) {
         direction = "sitting";
+        console.log("TRUE");
         updateNPCPosition(x, y, direction, npcColor);
         return;
       }
+      console.log(x + " " + y);
 
       if (x === 7 && y > 9) {
-        if (Math.random() < 0.9) {
-          // chance to move up to table(90% for testing purposes)
-          y--;
-          direction = "up";
+        y--;
+        direction = "up";
+        updateNPCPosition(x, y, direction, npcColor);
+        if (y === 9) {
+          direction = "sitting";
           updateNPCPosition(x, y, direction, npcColor);
-          if (y === 9) {
-            return;
-          }
+          return;
         }
       } else if (direction === "right" && x < 7) {
         x++;
@@ -393,14 +394,17 @@ function getRandomSafeSpot() {
     const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
     npcRef.set({ x, y, direction, color });
 
-    // Update the direction attribute in the NPC element
     const npcElement = npcsElements[getKeyString(x, y)];
     if (npcElement) {
       npcElement.setAttribute("data-direction", direction);
+      npcElement.setAttribute("data-color", color);
     }
     let oldX = x,
       oldY = y;
     switch (direction) {
+      case x === 7 && y === 9 && direction === "up":
+        direction == "sitting";
+        break;
       case "right":
         oldX -= 1;
         break;
