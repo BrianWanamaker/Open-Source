@@ -346,11 +346,10 @@ function getRandomSafeSpot() {
   // place the npcs
   function placeAndMoveNPC() {
     // bottom left (2,11) or bottom right (12,11)
-    let startPosition =
-      Math.random() < 0.5 ? { x: 2, y: 11 } : { x: 12, y: 11 };
+    let startPosition = { x: 2, y: 11 };
     let { x, y } = startPosition;
 
-    let direction = x === 2 ? "right" : "left";
+    let direction = "right";
 
     const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
     npcRef.set({
@@ -360,18 +359,17 @@ function getRandomSafeSpot() {
     });
 
     function makeMove() {
-      let direction = "right"; // Default direction, adjust as necessary
-      // Example coordinates for the table's position
+      let direction = "right";
+
       const tableX = 7;
       const tableY = 9;
 
       if (x === tableX && y === tableY) {
-        // NPC has arrived at the table, update its state to sitting
         direction = "sitting";
         updateNPCPosition(npcId, x, y, direction);
-        return; // No further movement required
+        return;
       }
-      // Check if NPC is directly beneath the table
+
       if (x === 7 && y > 9) {
         if (Math.random() < 0.9) {
           // chance to move up to table(90% for testing purposes)
@@ -419,7 +417,7 @@ function getRandomSafeSpot() {
       case "down":
         oldY -= 1;
         break;
-      case "sitting": // Additional case to handle if needed
+      case "sitting":
         break;
     }
 
