@@ -369,14 +369,13 @@ function getRandomSafeSpot() {
       console.log(x + " " + y);
 
       if (x === 7 && y > 9) {
-        y--; // This will move the NPC from 7x10 to 7x9 on the next move.
+        y--;
         direction = "up";
         updateNPCPosition(x, y, direction, npcColor);
         if (y === 9) {
-          // If the NPC is at 7x10 and moves up, it will reach 7x9 and should sit.
           direction = "sitting";
           updateNPCPosition(x, y, direction, npcColor);
-          return; // Stop moving after sitting.
+          return;
         }
       } else if (direction === "right" && x < 7) {
         x++;
