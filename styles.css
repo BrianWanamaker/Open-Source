@@ -7,12 +7,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: linear-gradient(
-    180deg,
-    #64beff -50%,
-    #6e96ff 69.71%,
-    #2a65ff 150%
-  );
+  background: linear-gradient(180deg,
+      #64beff -50%,
+      #6e96ff 69.71%,
+      #2a65ff 150%);
   font-family: "Source Sans Pro", sans-serif;
   display: flex;
   align-items: center;
@@ -60,6 +58,7 @@ input[type="text"] {
   width: 150px;
   /* text-transform: uppercase; */
 }
+
 input[type="text"]:focus {
   border-color: #f000ff;
 }
@@ -72,6 +71,7 @@ button {
   border-bottom: 2px solid #1e830b;
   cursor: pointer;
 }
+
 button:active {
   position: relative;
   top: 1px;
@@ -79,19 +79,23 @@ button:active {
 
 /* Characters */
 .grid-cell {
-  position: absolute;
+   position: absolute; 
   width: 16px;
   height: 19px;
 }
+
 .Character {
   transition: transform 0.4s;
 }
+
 .Character.you {
   z-index: 1;
 }
+
 .Character.you .Character_you-arrow {
   display: block;
 }
+
 .Character_you-arrow {
   display: none;
   position: absolute;
@@ -101,10 +105,16 @@ button:active {
   height: 5px;
   background: url(/images/arrow.png) no-repeat no-repeat;
 }
+ 
 .Character_sprite {
   overflow: hidden;
   top: -3px;
   background: url(/images/characters.png);
+}
+
+.Character[data-animation-state="idle"] .Character_sprite {
+  background: url(/images/characters.png);
+  
 }
 .Character[data-direction="right"] .Character_sprite {
   background-position-x: 19px;
@@ -115,6 +125,121 @@ button:active {
 .Character[data-color="orange"] .Character_sprite {
   background-position-y: -38px;
 }
+
+
+.Character[data-animation-state="walking"] .Character_sprite {
+  background: url('images/CharacterRunSpriteSheet.gif');
+
+}
+.Character[data-direction="right"] .Character_sprite {
+  background-position-x: 16px;
+  
+}
+.Character[data-color="red"] .Character_sprite {
+  background-position-y: -19px;
+}
+.Character[data-color="orange"] .Character_sprite {
+  background-position-y: -38px;
+ 
+}
+
+.Character[data-animation-state="kick"] .Character_sprite {
+  background: url('images/KickCharacterSpriteSheet.gif');
+
+}
+
+.Character[data-animation-state="kick"][data-color="blue"][data-direction="left"]  .Character_sprite {
+  background-position-y: 0px;
+  background-position-x: 1px;
+}
+.Character[data-animation-state="kick"][data-color="blue"][data-direction="right"]  .Character_sprite {
+ 
+  background-position-x: 15px;
+}
+.Character[data-animation-state="kick"][data-color="red"][data-direction="right"]  .Character_sprite {
+  background-position-y: -17px;
+  background-position-x: 15px;
+}
+
+.Character[data-animation-state="kick"][data-color="red"][data-direction="left"] .Character_sprite {
+  background-position-y: -17px; 
+  background-position-x: 1px;
+ 
+}
+
+.Character[data-animation-state="kick"][data-color="orange"][data-direction="left"] .Character_sprite {
+  background-position-y: -36px;
+  background-position-x: 1px; 
+ 
+}
+.Character[data-animation-state="kick"][data-color="orange"][data-direction="right"] .Character_sprite {
+  background-position-x: -14px; 
+  background-position-y: -36px;
+ 
+}
+
+
+.Character[data-animation-state="hit"] .Character_sprite {
+  background: url('images/HitCharacterSpriteSheet.gif');
+
+}
+
+.Character[data-animation-state="hit"][data-color="blue"][data-direction="left"]  .Character_sprite {
+  background-position-y: 0px;
+  background-position-x: 1px;
+}
+.Character[data-animation-state="hit"][data-color="blue"][data-direction="right"]  .Character_sprite {
+ 
+  background-position-x: 15px;
+}
+.Character[data-animation-state="hit"][data-color="red"][data-direction="right"]  .Character_sprite {
+  background-position-y: -17px;
+  background-position-x: 15px;
+}
+
+.Character[data-animation-state="hit"][data-color="red"][data-direction="left"] .Character_sprite {
+  background-position-y: -17px; 
+  background-position-x: 1px;
+ 
+}
+
+.Character[data-animation-state="hit"][data-color="orange"][data-direction="left"] .Character_sprite {
+  background-position-y: -36px;
+  background-position-x: 0px; 
+ 
+}
+.Character[data-animation-state="hit"][data-color="orange"][data-direction="right"] .Character_sprite {
+  background-position-x: -15px; 
+  background-position-y: -36px;
+ 
+}
+
+
+
+
+
+/* .Character_sprite {
+  overflow: hidden;
+  top: -3px;
+  background: url(/images/characters.png);
+  outline: 2px solid red;
+}
+.Character[data-direction="right"] .Character_sprite {
+  background-position-x: 19px;
+}
+.Character[data-color="red"] .Character_sprite {
+  background-position-y: -19px;
+}
+.Character[data-color="orange"] .Character_sprite {
+  background-position-y: -38px;
+} */
+
+
+
+
+
+
+
 .Character_shadow {
   background: url(/images/shadow.png) no-repeat no-repeat;
 }
@@ -132,6 +257,7 @@ button:active {
   text-transform: uppercase;
   white-space: nowrap;
 }
+
 .Character_coins {
   margin-left: 1px;
   color: gold;
@@ -142,17 +268,21 @@ button:active {
   background: url(/images/coin.png) no-repeat no-repeat;
   animation: coinFloat 0.8s linear infinite alternate-reverse;
 }
+
 @keyframes coinFloat {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(5px);
   }
 }
+
 .Coin_shadow {
   background: url(/images/coin-shadow.png) no-repeat no-repeat;
 }
+
 /* NPCS */
 .Npc_sprite {
   background: url(/images/right.gif) no-repeat no-repeat;
@@ -166,6 +296,7 @@ button:active {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translatex(225px);
   }
@@ -173,9 +304,12 @@ button:active {
 
 .Pizza_sprite {
   background: url(/images/pizza-slice.png) no-repeat no-repeat;
-  width: 16px; /* or the actual width of your pizza image */
-  height: 16px; /* or the actual height of your pizza image */
-  background-size: contain; /* This ensures the image fits inside the element */
+  width: 16px;
+  /* or the actual width of your pizza image */
+  height: 16px;
+  /* or the actual height of your pizza image */
+  background-size: contain;
+  /* This ensures the image fits inside the element */
   /* Adjust size if needed, and make sure the pizza.png is centered in the div */
   /*border: 1px solid red; /* Just for debugging */
   animation: pizzaFloat 0.8s linear infinite alternate-reverse;
@@ -185,6 +319,7 @@ button:active {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(5px);
   }
@@ -192,21 +327,27 @@ button:active {
 
 .Coffee_sprite {
   background: url(/images/coffee.png) no-repeat no-repeat;
-  width: 16px; /* or the actual width of your pizza image */
-  height: 16px; /* or the actual height of your pizza image */
-  background-size: contain; /* This ensures the image fits inside the element */
+  width: 16px;
+  /* or the actual width of your pizza image */
+  height: 16px;
+  /* or the actual height of your pizza image */
+  background-size: contain;
+  /* This ensures the image fits inside the element */
   /* Adjust size if needed, and make sure the pizza.png is centered in the div */
   /*border: 1px solid red; /* Just for debugging */
   animation: coffeeFloat 0.8s linear infinite alternate-reverse;
 }
+
 @keyframes coffeeFloat {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(5px);
   }
 }
+
 /* chatbox */
 #chat-container {
   position: absolute;
