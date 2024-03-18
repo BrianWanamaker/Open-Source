@@ -161,6 +161,19 @@ button:active {
   height: 16px;
   /* animation: moveNPC 5s linear infinite alternate-reverse; */
 }
+.NPC[data-direction="right"] .Npc_sprite {
+  background: url(/images/right.gif) no-repeat no-repeat;
+}
+.NPC[data-direction="left"] .Npc_sprite {
+  background: url(/images/left.gif) no-repeat no-repeat;
+}
+
+.NPC[data-direction="up"] .Npc_sprite {
+  background: url(/images/up.gif) no-repeat no-repeat;
+}
+.NPC[data-direction="sitting"] .Npc_sprite {
+  background: url(/images/sitting.gif) no-repeat no-repeat;
+}
 
 .Pizza_sprite {
   background: url(/images/pizza-slice.png) no-repeat no-repeat;
