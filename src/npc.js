@@ -28,11 +28,9 @@ export function placeAndMoveNPC() {
     const tableY = 9;
     if (x === tableX && y === tableY) {
       direction = "sitting";
-      console.log("TRUE");
       updateNPCPosition(x, y, direction, npcColor);
       return;
     }
-    console.log(x + " " + y);
 
     if (x === 7 && y > 9) {
       y--;
@@ -84,6 +82,7 @@ function updateNPCPosition(x, y, direction, color) {
       oldY -= 1;
       break;
     case "sitting":
+      orderFoodOrDrink(x, y);
       break;
   }
 
@@ -91,6 +90,35 @@ function updateNPCPosition(x, y, direction, color) {
   if (direction !== "sitting" && oldKey !== getKeyString(x, y)) {
     firebase.database().ref(`npcs/${oldKey}`).remove();
   }
+}
+function orderFoodOrDrink(x, y) {
+  const options = ["pizza", "coffee"];
+  const order = randomFromArray(options);
+
+  const npcKey = getKeyString(x, y);
+  const npcElement = npcsElements[npcKey];
+  if (npcElement) {
+    showOrder(npcElement, order);
+  }
+}
+function showOrder(npcElement, order) {
+  let orderBubble = npcElement.querySelector(".order-bubble");
+  if (!orderBubble) {
+    orderBubble = document.createElement("div");
+    orderBubble.classList.add("order-bubble");
+    npcElement.appendChild(orderBubble);
+  }
+
+  orderBubble.innerText = order === "pizza" ? "🍕" : "☕️";
+  orderBubble.style.display = "block";
+  orderBubble.style.position = "absolute";
+  orderBubble.style.bottom = "24px";
+  orderBubble.style.left = "50%";
+
+  orderBubble.classList.add("order-animation");
+  // setTimeout(() => {
+  //   orderBubble.style.display = "none";
+  // }, 10000);
 }
 
 allNPCSRef.on("value", (snapshot) => {
