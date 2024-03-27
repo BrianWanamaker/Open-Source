@@ -96,6 +96,10 @@ function orderFoodOrDrink(x, y) {
   const order = randomFromArray(options);
 
   const npcKey = getKeyString(x, y);
+  const npcRef = firebase.database().ref(`npcs/${npcKey}`);
+  npcRef.update({
+    order: order,
+  });
   const npcElement = npcsElements[npcKey];
   if (npcElement) {
     showOrder(npcElement, order);
@@ -131,7 +135,7 @@ allNPCSRef.on("value", (snapshot) => {
 allNPCSRef.on("child_added", (snapshot) => {
   const npc = snapshot.val();
   const key = getKeyString(npc.x, npc.y);
-  npcs[key] = true;
+  npcs[key] = npc; // Store the whole NPC object
 
   const npcElement = document.createElement("div");
   npcElement.classList.add("NPC", "grid-cell");
@@ -146,7 +150,29 @@ allNPCSRef.on("child_added", (snapshot) => {
 
   npcsElements[key] = npcElement;
   gameContainer.appendChild(npcElement);
+
+  // Check if this NPC has an order and display it
+  if (npc.order) {
+    showOrder(npcElement, npc.order);
+  }
 });
+
+allNPCSRef.on("child_changed", (snapshot) => {
+  const npc = snapshot.val();
+  const key = getKeyString(npc.x, npc.y);
+
+  // Update local NPC data
+  npcs[key] = npc;
+
+  // If there is a visual change (e.g., new order), handle it here
+  if (npc.order) {
+    const npcElement = npcsElements[key];
+    if (npcElement) {
+      showOrder(npcElement, npc.order);
+    }
+  }
+});
+
 allNPCSRef.on("child_removed", (snapshot) => {
   const { x, y } = snapshot.val();
   const keyToRemove = getKeyString(x, y);
