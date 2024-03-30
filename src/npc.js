@@ -107,7 +107,7 @@ export function interactWithNpc(npcKey, npc) {
     npc.direction = "standing";
     updateNPCPosition(npc.x, npc.y, "standing", npc.color);
     playerLosesCoffee();
-    playerScoresPoints(5);
+    playerScoresPoints(10);
   } else if (
     npc.direction === "sitting" &&
     npc.order === "pizza" &&
@@ -116,7 +116,7 @@ export function interactWithNpc(npcKey, npc) {
     npc.direction = "standing";
     updateNPCPosition(npc.x, npc.y, "standing", npc.color);
     playerLosesPizza();
-    playerScoresPoints(5);
+    playerScoresPoints(10);
   }
 }
 

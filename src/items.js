@@ -190,7 +190,7 @@ export function playerLosesPizza() {
 }
 
 export function playerScoresPoints(points) {
-  if (!players[playerId].score) players[playerId].score = 0;
-  players[playerId].score += points;
-  playerRef.update({ score: players[playerId].score });
+  playerRef.update({
+    coins: players[playerId].coins + points,
+  });
 }
