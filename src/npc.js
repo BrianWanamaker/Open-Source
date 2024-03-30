@@ -1,14 +1,21 @@
 import { npcColors, randomFromArray, getKeyString } from "./misc.js";
 import { gameContainer } from "./misc.js";
+import {
+  playerHasCoffee,
+  playerHasPizza,
+  playerLosesPizza,
+  playerLosesCoffee,
+  playerScoresPoints,
+} from "./items.js";
 
-let npcs = {};
+export let npcs = {};
 let npcsElements = {};
 const allNPCSRef = firebase.database().ref(`npcs`);
 // place the npcs
 placeAndMoveNPC();
 export function placeAndMoveNPC() {
   let npcColor = randomFromArray(npcColors);
-  // bottom left (2,11) or bottom right (12,11)
+  // bottom left (2,11)
   let startPosition = { x: 2, y: 11 };
   let { x, y } = startPosition;
 
@@ -91,6 +98,28 @@ function updateNPCPosition(x, y, direction, color) {
     firebase.database().ref(`npcs/${oldKey}`).remove();
   }
 }
+export function interactWithNpc(npcKey, npc) {
+  if (
+    npc.direction === "sitting" &&
+    npc.order === "coffee" &&
+    playerHasCoffee()
+  ) {
+    npc.direction = "standing";
+    updateNPCPosition(npc.x, npc.y, "standing", npc.color);
+    playerLosesCoffee();
+    playerScoresPoints(5);
+  } else if (
+    npc.direction === "sitting" &&
+    npc.order === "pizza" &&
+    playerHasPizza()
+  ) {
+    npc.direction = "standing";
+    updateNPCPosition(npc.x, npc.y, "standing", npc.color);
+    playerLosesPizza();
+    playerScoresPoints(5);
+  }
+}
+
 function orderFoodOrDrink(x, y) {
   const options = ["pizza", "coffee"];
   const order = randomFromArray(options);

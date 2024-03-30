@@ -1,6 +1,7 @@
 import { attemptGrabPizza, attemptGrabCoffee } from "./items.js";
 import { attemptGrabCoin } from "./coins.js";
 import { mapData, isSolid } from "./misc.js";
+import { npcs, interactWithNpc } from "./npc.js";
 import {
   gameContainer,
   playerNameInput,
@@ -41,6 +42,16 @@ export function handleArrowPress(xChange = 0, yChange = 0) {
     attemptGrabPizza(newX, newY);
     attemptGrabCoffee(newX, newY);
   }
+  checkForNpcInteraction(newX, newY);
+}
+
+function checkForNpcInteraction(playerX, playerY) {
+  Object.keys(npcs).forEach((npcKey) => {
+    const npc = npcs[npcKey];
+    if (npc.x === playerX && npc.y === playerY) {
+      interactWithNpc(npcKey, npc);
+    }
+  });
 }
 
 allPlayersRef.on("value", (snapshot) => {
@@ -351,6 +362,7 @@ firebase.auth().onAuthStateChanged((user) => {
       x,
       y,
       coins: 0,
+      items: { coffee: false, pizza: false },
     });
 
     //Remove me from Firebase when I diconnect

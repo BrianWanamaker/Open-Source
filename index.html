@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Multiplayer Demo</title>
+    <title>Delivery Duel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
@@ -9,6 +9,30 @@
     <link rel="stylesheet" href="/styles.css" type="text/css">
   </head>
   <body>
+    <div id="welcome-screen" class="modal">
+      <div class="modal-content">
+        <h2>Welcome to Delivery Derby!</h2>
+        <h3>Instructions:</h3>
+        <ul>
+          <li>Use arrow keys to move.</li>
+          <li>Pick up coffee, pizza, and coins to score points.</li>
+          <li>Deliver the items to the NPCs that request them.</li>
+          <li>Avoid picking up more items if you already have one.</li>
+        </ul>
+        <h3>Controls:</h3>
+        <ul>
+          <li>'K' to kick and create space.</li>
+          <li>'P' to pick up another player.</li>
+          <li>'T' to throw the carried player.</li>
+        </ul>
+        <button id="start-game">Start Game</button>
+      </div>
+    </div>
+    <script>
+      document.querySelector('#start-game').addEventListener('click', function() {
+        document.getElementById('welcome-screen').style.display = 'none';
+      });
+    </script>
 
     <div class="game-container">
     </div>

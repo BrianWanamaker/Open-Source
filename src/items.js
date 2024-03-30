@@ -1,5 +1,5 @@
 import { gameContainer } from "./misc.js";
-import { playerId, playerElements } from "./playerData.js";
+import { playerId, playerElements, players, playerRef } from "./playerData.js";
 
 let pizzaX = 7;
 let pizzaY = 7;
@@ -31,33 +31,35 @@ checkAndPlacePizza();
 checkAndPlaceCoffee();
 
 function placePizza() {
-  if (!document.querySelector(".Pizza")) {
-    pizzaX = 11;
-    pizzaY = 4;
-
-    const pizzaElement = document.createElement("div");
-    pizzaElement.classList.add("Pizza", "grid-cell");
-    pizzaElement.innerHTML = `<div class="Pizza_sprite grid-cell"></div>`;
-
-    const left = 16 * pizzaX + "px";
-    const top = 16 * pizzaY + "px";
-    pizzaElement.style.transform = `translate3d(${left}, ${top}, 0)`;
-
-    gameContainer.appendChild(pizzaElement);
-  }
+  removePizza();
+  pizzaX = 11;
+  pizzaY = 4;
+  const pizzaElement = document.createElement("div");
+  pizzaElement.classList.add("Pizza", "grid-cell");
+  pizzaElement.innerHTML = `<div class="Pizza_sprite grid-cell"></div>`;
+  pizzaElement.style.transform = `translate3d(${16 * pizzaX}px, ${
+    16 * pizzaY
+  }px, 0)`;
+  gameContainer.appendChild(pizzaElement);
 }
 
 export function attemptGrabPizza(x, y) {
   if (x === pizzaX && y === pizzaY) {
-    const pizzaRef = firebase.database().ref("gameState/pizza");
-    pizzaRef.set({ pickedUp: true, by: playerId });
-
-    const playerElement = playerElements[playerId];
-    if (playerElement) {
-      const pizzaIcon = playerElement.querySelector(".Character_pizza-icon");
-      if (pizzaIcon) {
-        pizzaIcon.style.display = "inline";
+    if (!playerHasPizza() && !playerHasCoffee()) {
+      const pizzaRef = firebase.database().ref("gameState/pizza");
+      pizzaRef.set(false);
+      const playerElement = playerElements[playerId];
+      if (playerElement) {
+        const pizzaIcon = playerElement.querySelector(".Character_pizza-icon");
+        if (pizzaIcon) {
+          pizzaIcon.style.display = "inline";
+        }
+        players[playerId].items = players[playerId].items || {};
+        players[playerId].items.pizza = true;
+        firebase.database().ref(`players/${playerId}/items/pizza`).set(true);
       }
+    } else {
+      console.log("Player already has an item and can't pick up another.");
     }
   }
 }
@@ -68,65 +70,116 @@ function getRandomDelay(min, max) {
 
 const pizzaRef = firebase.database().ref("gameState/pizza");
 pizzaRef.on("value", (snapshot) => {
-  const pizzaState = snapshot.val();
-  if (pizzaState && pizzaState.pickedUp) {
+  if (!snapshot.val()) {
     removePizza();
-    setTimeout(placePizza, getRandomDelay(5000, 10000));
+
+    setTimeout(() => {
+      pizzaRef.set(true);
+    }, getRandomDelay(5000, 10000));
+  } else {
+    placePizza();
   }
 });
 
 function removePizza() {
-  console.log("pizza removed");
   const pizzaElement = document.querySelector(".Pizza");
-  if (pizzaElement) {
-    gameContainer.removeChild(pizzaElement);
+  if (pizzaElement && pizzaElement.parentNode) {
+    pizzaElement.parentNode.removeChild(pizzaElement);
   }
 }
+
 function placeCoffee() {
-  if (!document.querySelector(".Coffee")) {
-    coffeeX = 3;
-    coffeeY = 4;
-
-    const coffeeElement = document.createElement("div");
-    coffeeElement.classList.add("Coffee", "grid-cell");
-    coffeeElement.innerHTML = `<div class="Coffee_sprite grid-cell"></div>`;
-
-    const left = 16 * coffeeX + "px";
-    const top = 16 * coffeeY + "px";
-    coffeeElement.style.transform = `translate3d(${left}, ${top}, 0)`;
-
-    gameContainer.appendChild(coffeeElement);
-  }
+  removeCoffee();
+  coffeeX = 3;
+  coffeeY = 4;
+  const coffeeElement = document.createElement("div");
+  coffeeElement.classList.add("Coffee", "grid-cell");
+  coffeeElement.innerHTML = `<div class="Coffee_sprite grid-cell"></div>`;
+  coffeeElement.style.transform = `translate3d(${16 * coffeeX}px, ${
+    16 * coffeeY
+  }px, 0)`;
+  gameContainer.appendChild(coffeeElement);
 }
 
 export function attemptGrabCoffee(x, y) {
   if (x === coffeeX && y === coffeeY) {
-    const coffeeRef = firebase.database().ref("gameState/coffee");
-    coffeeRef.set({ pickedUp: true, by: playerId });
-
-    const playerElement = playerElements[playerId];
-    if (playerElement) {
-      const coffeeIcon = playerElement.querySelector(".Character_coffee-icon");
-      if (coffeeIcon) {
-        coffeeIcon.style.display = "inline";
+    if (!playerHasPizza() && !playerHasCoffee()) {
+      const coffeeRef = firebase.database().ref("gameState/coffee");
+      coffeeRef.set(false);
+      const playerElement = playerElements[playerId];
+      if (playerElement) {
+        const coffeeIcon = playerElement.querySelector(
+          ".Character_coffee-icon"
+        );
+        if (coffeeIcon) {
+          coffeeIcon.style.display = "inline";
+        }
+        players[playerId].items = players[playerId].items || {};
+        players[playerId].items.coffee = true;
+        firebase.database().ref(`players/${playerId}/items/coffee`).set(true);
       }
+    } else {
+      console.log("Player already has an item.");
     }
   }
 }
-
 const coffeeRef = firebase.database().ref("gameState/coffee");
 coffeeRef.on("value", (snapshot) => {
-  const coffeeState = snapshot.val();
-  if (coffeeState && coffeeState.pickedUp) {
+  if (!snapshot.val()) {
     removeCoffee();
-    setTimeout(placeCoffee, getRandomDelay(5000, 10000));
+    setTimeout(() => {
+      coffeeRef.set(true);
+    }, getRandomDelay(5000, 10000));
+  } else {
+    placeCoffee();
   }
 });
 
 function removeCoffee() {
   const coffeeElement = document.querySelector(".Coffee");
-  console.log("remove coffee");
-  if (coffeeElement) {
-    gameContainer.removeChild(coffeeElement);
+  if (coffeeElement && coffeeElement.parentNode) {
+    coffeeElement.parentNode.removeChild(coffeeElement);
   }
+}
+
+export function playerHasCoffee() {
+  return players[playerId].items && players[playerId].items.coffee;
+}
+export function playerHasPizza() {
+  return players[playerId].items && players[playerId].items.pizza;
+}
+
+export function playerLosesCoffee() {
+  if (players[playerId].items && players[playerId].items.coffee) {
+    players[playerId].items.coffee = false;
+    firebase.database().ref(`players/${playerId}/items/coffee`).set(false);
+
+    const playerElement = playerElements[playerId];
+    if (playerElement) {
+      const coffeeIcon = playerElement.querySelector(".Character_coffee-icon");
+      if (coffeeIcon) {
+        coffeeIcon.style.display = "none";
+      }
+    }
+  }
+}
+export function playerLosesPizza() {
+  if (players[playerId].items && players[playerId].items.pizza) {
+    players[playerId].items.pizza = false;
+    firebase.database().ref(`players/${playerId}/items/pizza`).set(false);
+
+    const playerElement = playerElements[playerId];
+    if (playerElement) {
+      const pizzaIcon = playerElement.querySelector(".Character_pizza-icon");
+      if (pizzaIcon) {
+        pizzaIcon.style.display = "none";
+      }
+    }
+  }
+}
+
+export function playerScoresPoints(points) {
+  if (!players[playerId].score) players[playerId].score = 0;
+  players[playerId].score += points;
+  playerRef.update({ score: players[playerId].score });
 }

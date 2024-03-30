@@ -14,7 +14,7 @@ export function placeCoin() {
     y,
   });
 
-  const coinTimeouts = [2000, 3000, 4000, 5000];
+  const coinTimeouts = [3000, 4000, 5000, 6000];
   setTimeout(() => {
     placeCoin();
   }, randomFromArray(coinTimeouts));

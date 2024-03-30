@@ -114,3 +114,7 @@ export function getRandomSafeSpot() {
     { x: 11, y: 4 },
   ]);
 }
+
+document.addEventListener("DOMContentLoaded", (event) => {
+  document.getElementById("welcome-screen").style.display = "block";
+});
