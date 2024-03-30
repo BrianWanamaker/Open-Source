@@ -59,9 +59,20 @@ export function attemptGrabPizza(x, y) {
         firebase.database().ref(`players/${playerId}/items/pizza`).set(true);
       }
     } else {
-      console.log("Player already has an item and can't pick up another.");
+      displayErrorMessage("You can only hold one item at a time!");
     }
   }
+}
+
+function displayErrorMessage(message) {
+  const errorMessage = document.createElement("div");
+  errorMessage.textContent = message;
+  errorMessage.classList.add("error-message");
+  document.querySelector(".game-container").appendChild(errorMessage);
+
+  setTimeout(() => {
+    errorMessage.remove();
+  }, 1500);
 }
 
 function getRandomDelay(min, max) {
@@ -119,7 +130,7 @@ export function attemptGrabCoffee(x, y) {
         firebase.database().ref(`players/${playerId}/items/coffee`).set(true);
       }
     } else {
-      console.log("Player already has an item.");
+      displayErrorMessage("You can only hold one item at a time!");
     }
   }
 }
