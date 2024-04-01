@@ -7,12 +7,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: linear-gradient(
-    180deg,
-    #64beff -50%,
-    #6e96ff 69.71%,
-    #2a65ff 150%
-  );
+  background: linear-gradient(180deg,
+      #64beff -50%,
+      #6e96ff 69.71%,
+      #2a65ff 150%);
   font-family: "Source Sans Pro", sans-serif;
   display: flex;
   align-items: center;
@@ -117,12 +115,15 @@ button:active {
 .Character[data-animation-state="idle"] .Character_sprite {
   background: url(/images/characters.png);
 }
+
 .Character[data-direction="right"] .Character_sprite {
   background-position-x: 19px;
 }
+
 .Character[data-color="red"] .Character_sprite {
   background-position-y: -19px;
 }
+
 .Character[data-color="orange"] .Character_sprite {
   background-position-y: -38px;
 }
@@ -130,12 +131,15 @@ button:active {
 .Character[data-animation-state="walking"] .Character_sprite {
   background: url("images/CharacterRunSpriteSheet.gif");
 }
+
 .Character[data-direction="right"] .Character_sprite {
   background-position-x: 16px;
 }
+
 .Character[data-color="red"] .Character_sprite {
   background-position-y: -19px;
 }
+
 .Character[data-color="orange"] .Character_sprite {
   background-position-y: -38px;
 }
@@ -144,34 +148,31 @@ button:active {
   background: url("images/KickCharacterSpriteSheet.gif");
 }
 
-.Character[data-animation-state="kick"][data-color="blue"][data-direction="left"]
-  .Character_sprite {
+.Character[data-animation-state="kick"][data-color="blue"][data-direction="left"] .Character_sprite {
   background-position-y: 0px;
   background-position-x: 1px;
 }
-.Character[data-animation-state="kick"][data-color="blue"][data-direction="right"]
-  .Character_sprite {
+
+.Character[data-animation-state="kick"][data-color="blue"][data-direction="right"] .Character_sprite {
   background-position-x: 15px;
 }
-.Character[data-animation-state="kick"][data-color="red"][data-direction="right"]
-  .Character_sprite {
+
+.Character[data-animation-state="kick"][data-color="red"][data-direction="right"] .Character_sprite {
   background-position-y: -17px;
   background-position-x: 15px;
 }
 
-.Character[data-animation-state="kick"][data-color="red"][data-direction="left"]
-  .Character_sprite {
+.Character[data-animation-state="kick"][data-color="red"][data-direction="left"] .Character_sprite {
   background-position-y: -17px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="kick"][data-color="orange"][data-direction="left"]
-  .Character_sprite {
+.Character[data-animation-state="kick"][data-color="orange"][data-direction="left"] .Character_sprite {
   background-position-y: -36px;
   background-position-x: 1px;
 }
-.Character[data-animation-state="kick"][data-color="orange"][data-direction="right"]
-  .Character_sprite {
+
+.Character[data-animation-state="kick"][data-color="orange"][data-direction="right"] .Character_sprite {
   background-position-x: -14px;
   background-position-y: -36px;
 }
@@ -180,36 +181,81 @@ button:active {
   background: url("images/HitCharacterSpriteSheet.gif");
 }
 
-.Character[data-animation-state="hit"][data-color="blue"][data-direction="left"]
-  .Character_sprite {
+.Character[data-animation-state="hit"][data-color="blue"][data-direction="left"] .Character_sprite {
   background-position-y: 0px;
   background-position-x: 1px;
 }
-.Character[data-animation-state="hit"][data-color="blue"][data-direction="right"]
-  .Character_sprite {
+
+.Character[data-animation-state="hit"][data-color="blue"][data-direction="right"] .Character_sprite {
   background-position-x: 15px;
 }
-.Character[data-animation-state="hit"][data-color="red"][data-direction="right"]
-  .Character_sprite {
+
+.Character[data-animation-state="hit"][data-color="red"][data-direction="right"] .Character_sprite {
   background-position-y: -17px;
   background-position-x: 15px;
 }
 
-.Character[data-animation-state="hit"][data-color="red"][data-direction="left"]
-  .Character_sprite {
+.Character[data-animation-state="hit"][data-color="red"][data-direction="left"] .Character_sprite {
   background-position-y: -17px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="hit"][data-color="orange"][data-direction="left"]
-  .Character_sprite {
+.Character[data-animation-state="hit"][data-color="orange"][data-direction="left"] .Character_sprite {
   background-position-y: -36px;
   background-position-x: 0px;
 }
-.Character[data-animation-state="hit"][data-color="orange"][data-direction="right"]
-  .Character_sprite {
+
+.Character[data-animation-state="hit"][data-color="orange"][data-direction="right"] .Character_sprite {
   background-position-x: -15px;
   background-position-y: -36px;
+}
+
+
+
+.Character[data-animation-state="pickedUp"] .Character_sprite {
+  background: url("images/SSpickedUp.gif");
+}
+
+.Character[data-animation-state="pickedUp"][data-color="blue"][data-direction="left"] .Character_sprite {
+  background-position-y: 0px;
+  background-position-x: 0px;
+  width: 18px;
+  height: 25px;
+
+}
+
+.Character[data-animation-state="pickedUp"][data-color="blue"][data-direction="right"] .Character_sprite {
+  background-position-x: 17px;
+  width: 18px;
+  height: 25px;
+}
+
+.Character[data-animation-state="pickedUp"][data-color="red"][data-direction="right"] .Character_sprite {
+  background-position-y: -25px;
+  background-position-x: 17px;
+  width: 18px;
+  height: 22px;
+}
+
+.Character[data-animation-state="pickedUp"][data-color="red"][data-direction="left"] .Character_sprite {
+  background-position-y: -25px;
+  background-position-x: 0px;
+  width: 18px;
+  height: 22px;
+}
+
+.Character[data-animation-state="pickedUp"][data-color="orange"][data-direction="left"] .Character_sprite {
+  background-position-y: -50px;
+  background-position-x: 0px;
+  width: 18px;
+  height: 23px;
+}
+
+.Character[data-animation-state="pickedUp"][data-color="orange"][data-direction="right"] .Character_sprite {
+  background-position-y: -50px;
+  background-position-x: 17px;
+  width: 18px;
+  height: 23;
 }
 
 /* .Character_sprite {
@@ -287,6 +333,7 @@ button:active {
 .NPC[data-direction="right"] .Npc_sprite {
   background: url(/images/right.gif) no-repeat no-repeat;
 }
+
 .NPC[data-direction="left"] .Npc_sprite {
   background: url(/images/left.gif) no-repeat no-repeat;
 }
@@ -294,12 +341,15 @@ button:active {
 .NPC[data-direction="up"] .Npc_sprite {
   background: url(/images/up.gif) no-repeat no-repeat;
 }
+
 .NPC[data-direction="sitting"] .Npc_sprite {
   background: url(/images/sitting.gif) no-repeat no-repeat;
 }
+
 .NPC[data-color="green"][data-direction="right"] .Npc_sprite {
   background-image: url(images/right.gif);
 }
+
 .NPC[data-color="green"][data-direction="up"] .Npc_sprite {
   background-image: url(images/up.gif);
 }
@@ -314,6 +364,7 @@ button:active {
 .NPC[data-color="blue"][data-direction="right"] .Npc_sprite {
   background-image: url(images/right_blue.gif);
 }
+
 .NPC[data-color="blue"][data-direction="up"] .Npc_sprite {
   background-image: url(images/up_blue.gif);
 }
@@ -362,6 +413,7 @@ button:active {
     transform: translateY(10px) translateX(-50%);
     opacity: 0;
   }
+
   100% {
     transform: translateY(0) translateX(-50%);
     opacity: 1;
