@@ -11,15 +11,16 @@ import {
 export let npcs = {};
 let npcsElements = {};
 const allNPCSRef = firebase.database().ref(`npcs`);
-// place the npcs
-placeAndMoveNPC();
-export function placeAndMoveNPC() {
-  let npcColor = randomFromArray(npcColors);
-  // bottom left (2,11)
-  let startPosition = { x: 2, y: 11 };
-  let { x, y } = startPosition;
+let direction = "right";
+let startPosition = { x: 2, y: 11 };
+let { x, y } = startPosition;
+let npcColor = randomFromArray(npcColors);
+let npcLeaving = false;
 
-  let direction = "right";
+placeNPC();
+export function placeNPC() {
+  x = startPosition.x;
+  y = startPosition.y;
   const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
   npcRef.set({
     x,
@@ -27,43 +28,56 @@ export function placeAndMoveNPC() {
     direction,
     color: npcColor,
   });
+  makeMove();
+}
+function makeMove() {
+  const tableX = 7;
+  const tableY = 9;
+  if (direction === "down") {
+    if (y < 11) {
+      npcLeaving = true;
+      y++;
+      updateNPCPosition(x, y, direction, npcColor);
+    } else {
+      direction = "right";
+    }
+  }
 
-  function makeMove() {
-    let direction = "right";
+  if (x === tableX && y === tableY && direction !== "sitting") {
+    direction = "sitting";
+    updateNPCPosition(x, y, direction, npcColor);
+    return;
+  }
 
-    const tableX = 7;
-    const tableY = 9;
-    if (x === tableX && y === tableY) {
+  if (x === 7 && y > 9 && direction !== "down" && npcLeaving !== true) {
+    y--;
+    direction = "up";
+    updateNPCPosition(x, y, direction, npcColor);
+    if (y === 9) {
       direction = "sitting";
       updateNPCPosition(x, y, direction, npcColor);
       return;
     }
-
-    if (x === 7 && y > 9) {
-      y--;
-      direction = "up";
-      updateNPCPosition(x, y, direction, npcColor);
-      if (y === 9) {
-        direction = "sitting";
-        updateNPCPosition(x, y, direction, npcColor);
-        return;
-      }
-    } else if (direction === "right" && x < 7) {
+  } else if (direction === "right") {
+    if (x < 13) {
       x++;
       updateNPCPosition(x, y, direction, npcColor);
-    } else if (direction === "left" && x > 7) {
-      x--;
-      updateNPCPosition(x, y, direction, npcColor);
+    } else {
+      firebase.database().ref(`npcs`).remove();
+      npcLeaving = false;
+      npcColor = randomFromArray(npcColors);
+      placeNPC();
+      return;
     }
-    const moveNPCTimeouts = [1000, 1500];
-    setTimeout(makeMove, randomFromArray(moveNPCTimeouts));
   }
-  makeMove();
+  const moveNPCTimeouts = [1500, 2000];
+  setTimeout(makeMove, randomFromArray(moveNPCTimeouts));
 }
 
 function updateNPCPosition(x, y, direction, color) {
   const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
   npcRef.set({ x, y, direction, color });
+  console.log(direction);
 
   const npcElement = npcsElements[getKeyString(x, y)];
   if (npcElement) {
@@ -99,24 +113,29 @@ function updateNPCPosition(x, y, direction, color) {
   }
 }
 export function interactWithNpc(npcKey, npc) {
+  console.log(npc.x, npc.y, npc.direction, npc.color);
   if (
     npc.direction === "sitting" &&
     npc.order === "coffee" &&
     playerHasCoffee()
   ) {
-    npc.direction = "standing";
-    updateNPCPosition(npc.x, npc.y, "standing", npc.color);
+    npc.direction = "down";
+    direction = "down";
+    updateNPCPosition(npc.x, npc.y, npc.direction, npc.color);
     playerLosesCoffee();
     playerScoresPoints(10);
+    makeMove();
   } else if (
     npc.direction === "sitting" &&
     npc.order === "pizza" &&
     playerHasPizza()
   ) {
-    npc.direction = "standing";
-    updateNPCPosition(npc.x, npc.y, "standing", npc.color);
+    npc.direction = "down";
+    direction = "down";
+    updateNPCPosition(npc.x, npc.y, npc.direction, npc.color);
     playerLosesPizza();
     playerScoresPoints(10);
+    makeMove();
   }
 }
 
@@ -151,6 +170,8 @@ function showOrder(npcElement, order) {
   orderBubble.classList.add("order-animation");
   // setTimeout(() => {
   //   orderBubble.style.display = "none";
+  //   direction = "down";
+  //   // makeMove();
   // }, 10000);
 }
 
@@ -190,10 +211,8 @@ allNPCSRef.on("child_changed", (snapshot) => {
   const npc = snapshot.val();
   const key = getKeyString(npc.x, npc.y);
 
-  // Update local NPC data
   npcs[key] = npc;
 
-  // If there is a visual change (e.g., new order), handle it here
   if (npc.order) {
     const npcElement = npcsElements[key];
     if (npcElement) {

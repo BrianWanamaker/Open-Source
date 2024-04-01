@@ -273,13 +273,17 @@ button:active {
 }
 
 /* NPCS */
+
+.NPC {
+  transition: transform 0.4s;
+}
 .Npc_sprite {
   background: url(/images/right.gif) no-repeat no-repeat;
-  /* background-position: 0 0; */
   width: 16px;
   height: 16px;
-  /* animation: moveNPC 5s linear infinite alternate-reverse; */
+  transition: transform 0.4s;
 }
+
 .NPC[data-direction="right"] .Npc_sprite {
   background: url(/images/right.gif) no-repeat no-repeat;
 }
@@ -300,11 +304,24 @@ button:active {
   background-image: url(images/up.gif);
 }
 
+.NPC[data-color="green"][data-direction="sitting"] .Npc_sprite {
+  background-image: url("/images/sitting.gif");
+}
+.NPC[data-color="green"][data-direction="down"] .Npc_sprite {
+  background-image: url("/images/down.gif");
+}
+
 .NPC[data-color="blue"][data-direction="right"] .Npc_sprite {
   background-image: url(images/right_blue.gif);
 }
 .NPC[data-color="blue"][data-direction="up"] .Npc_sprite {
   background-image: url(images/up_blue.gif);
+}
+.NPC[data-color="blue"][data-direction="sitting"] .Npc_sprite {
+  background-image: url("/images/sitting_blue.gif");
+}
+.NPC[data-color="blue"][data-direction="down"] .Npc_sprite {
+  background-image: url("/images/down_blue.gif");
 }
 
 .NPC[data-color="yellow"][data-direction="right"] .Npc_sprite {
@@ -315,16 +332,11 @@ button:active {
   background-image: url(images/up_yellow.gif);
 }
 
-.NPC[data-color="blue"][data-direction="sitting"] .Npc_sprite {
-  background-image: url("/images/sitting_blue.gif");
-}
-
-.NPC[data-color="green"][data-direction="sitting"] .Npc_sprite {
-  background-image: url("/images/sitting.gif");
-}
-
 .NPC[data-color="yellow"][data-direction="sitting"] .Npc_sprite {
   background-image: url("/images/sitting_yellow.gif");
+}
+.NPC[data-color="yellow"][data-direction="down"] .Npc_sprite {
+  background-image: url("/images/down_yellow.gif");
 }
 
 /* NPC Order Bubble */

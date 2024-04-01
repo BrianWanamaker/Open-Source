@@ -17,7 +17,7 @@ export function chat() {
     document.querySelector("#send-message").addEventListener("click", () => {
       const messageInput = document.querySelector("#chat-input");
       const message = messageInput.value.trim();
-      const MAX_LENGTH = 25;
+      const MAX_LENGTH = 40;
 
       if (message.length > MAX_LENGTH) {
         alert(`Messages cannot be longer than ${MAX_LENGTH} characters.`);

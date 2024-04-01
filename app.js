@@ -1,4 +1,4 @@
-import { placeAndMoveNPC } from "./src/npc.js";
+import { placeNPC } from "./src/npc.js";
 
 import { placeCoin } from "./src/coins.js";
 
