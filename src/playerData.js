@@ -18,6 +18,8 @@ export let playerId;
 export let playerRef;
 export let players = {};
 export let playerElements = {};
+export let carryingPlayerId = null; // Add this near your other global variable declarations
+
 
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
 new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
@@ -45,6 +47,9 @@ export function handleArrowPress(xChange = 0, yChange = 0) {
   checkForNpcInteraction(newX, newY);
 }
 
+
+
+
 function checkForNpcInteraction(playerX, playerY) {
   Object.keys(npcs).forEach((npcKey) => {
     const npc = npcs[npcKey];
@@ -55,11 +60,21 @@ function checkForNpcInteraction(playerX, playerY) {
 }
 
 allPlayersRef.on("value", (snapshot) => {
-  //Fires whenever a change occurs
-  players = snapshot.val() || {};
-  Object.keys(players).forEach((key) => {
-    const characterState = players[key];
-    let el = playerElements[key];
+ // Fires whenever a change occurs
+ players = snapshot.val() || {};
+ Object.keys(players).forEach((key) => {
+   const characterState = players[key];
+   let el = playerElements[key];
+   if (!el) {
+     console.error('No element found for player:', key);
+     return; // Skip this iteration if the element doesn't exist
+   }
+    // Update visibility based on the new `isVisible` property
+    if (characterState.isVisible === false) {
+      el.style.display = "none";
+    } else {
+      el.style.display = ""; // Or whatever display was initially ('block', 'flex', etc.)
+    };
     // Now update the DOM
     el.querySelector(".Character_name").innerText = characterState.name;
     el.querySelector(".Character_coins").innerText = characterState.coins;
@@ -73,8 +88,12 @@ allPlayersRef.on("value", (snapshot) => {
 });
 
 allPlayersRef.on("child_added", (snapshot) => {
-  //Fires whenever a new node is added the tree
   const addedPlayer = snapshot.val();
+  // Verify addedPlayer and its ID are valid
+  if (!addedPlayer || !addedPlayer.id) {
+    console.error("Invalid player data or missing ID:", addedPlayer);
+    return;
+  }
   const characterElement = document.createElement("div");
   characterElement.classList.add("Character", "grid-cell");
   if (addedPlayer.id === playerId) {
@@ -129,18 +148,22 @@ function isMoving() {
 
 // Update the animation state based on movement
 function updateAnimationState() {
-  if (isMoving()) {
-    // If any movement flag is true, set the animation state to "walking"
+  if (carryingPlayerId) {
+    // Player A is carrying Player B, so ensure the "pickedUp" animation state persists
+    playerRef.update({
+      animationState: "pickedUp",
+    });
+  } else if (isMoving()) {
     playerRef.update({
       animationState: "walking",
     });
   } else {
-    // If no movement flags are true, set the animation state to "idle"
     playerRef.update({
       animationState: "idle",
     });
   }
 }
+
 
 document.addEventListener("keydown", function (event) {
   let keyHandled = false;
@@ -166,7 +189,11 @@ document.addEventListener("keydown", function (event) {
     event.preventDefault(); // Prevent the default space bar action (e.g., page scrolling)
     return; // Skip the movementFlags check and update
   } else if (event.key === "p") {
-    attemptToPickUpPlayer();
+    if (!carryingPlayerId) {
+      attemptToPickUpPlayer();
+    }
+    event.preventDefault(); // Prevent default action
+  
   } else if (event.key === "t") {
     attemptToThrowPlayer();
   }
@@ -238,21 +265,29 @@ function performKick() {
 
 function attemptToPickUpPlayer() {
   Object.keys(players).forEach(function (id) {
-    if (id !== playerId) {
-      // Make sure the player is not trying to pick up themselves
+    if (id !== playerId && !carryingPlayerId) { // Ensure Player A is not already carrying another player
       const otherPlayer = players[id];
       const distanceX = Math.abs(players[playerId].x - otherPlayer.x);
       const distanceY = Math.abs(players[playerId].y - otherPlayer.y);
 
-      // Check if the other player is adjacent (one tile away in any direction)
-      if (
-        (distanceX === 1 && distanceY === 0) ||
-        (distanceX === 0 && distanceY === 1)
-      ) {
-        carryingPlayerId = id; // Set the carrying state
+      if ((distanceX === 1 && distanceY === 0) || (distanceX === 0 && distanceY === 1)) {
+        carryingPlayerId = id;
 
-        firebase.database().ref(`players/${playerId}`).update({ carrying: id });
-        firebase.database().ref(`players/${id}`).update({ isCarried: true });
+        // Update Player A's animation state to "pickingUp"
+        if (id === carryingPlayerId) {
+          firebase.database().ref(`players/${playerId}`).update({
+            animationState: "pickedUp",
+          });
+        }
+
+        // Temporarily hide Player B
+        firebase.database().ref(`players/${id}`).update({
+          isCarried: true,
+          isVisible: false, // Add this line
+        });
+
+        // Hide Player B's character element
+        playerElements[id].style.display = "none";
 
         console.log(`Player ${playerId} is now carrying player ${id}.`);
       }
@@ -260,54 +295,49 @@ function attemptToPickUpPlayer() {
   });
 }
 
+
+
 const throwDistance = 2; // Tiles the player can be thrown
 
 function attemptToThrowPlayer() {
   if (carryingPlayerId) {
-    const direction = players[playerId].direction; // The carrying player's facing direction
-    let newX = players[playerId].x; // Start from the carrying player's position
+    const direction = players[playerId].direction;
+    let newX = players[playerId].x;
     let newY = players[playerId].y;
 
-    // Adjust the thrown player's new position based on the direction
+    // Adjust newX and newY based on the direction
     switch (direction) {
-      case "up":
-        newY -= throwDistance; // Move up relative to the carrying player
-        break;
-      case "down":
-        newY += throwDistance; // Move down
-        break;
-      case "left":
-        newX -= throwDistance; // Move left
-        break;
-      case "right":
-        newX += throwDistance; // Move right
-        break;
-      default:
-        console.log("Unknown direction");
-        return; // Exit if direction is not recognized
+      case "up": newY -= throwDistance; break;
+      case "down": newY += throwDistance; break;
+      case "left": newX -= throwDistance; break;
+      case "right": newX += throwDistance; break;
     }
 
-    // Validate the new position
     if (!isSolid(newX, newY) && withinBoundaries(newX, newY)) {
-      // Update the thrown player's position
-      players[carryingPlayerId].x = newX;
-      players[carryingPlayerId].y = newY;
-
-      // Update Firebase with the new position of the thrown player
-      firebase.database().ref(`players/${carryingPlayerId}`).update({
+      const updates = {
         x: newX,
         y: newY,
-        isCarried: false, // Reset the carried status
-      });
+        isVisible: true,
+        animationState: "idle", 
+        isCarried: false,
+      };
 
-      // Reset the carrying player's state
-      firebase.database().ref(`players/${playerId}`).update({ carrying: null });
+      // Update Firebase with the new position 
+      firebase.database().ref(`players/${carryingPlayerId}`).update(updates);
+
+
       carryingPlayerId = null; // No longer carrying
     } else {
       console.log("Invalid throw destination.");
     }
   }
 }
+
+
+
+
+
+
 
 function withinBoundaries(x, y) {
   return (
@@ -319,10 +349,13 @@ function withinBoundaries(x, y) {
 }
 //Remove character DOM element after they leave
 allPlayersRef.on("child_removed", (snapshot) => {
-  const removedKey = snapshot.val().id;
-  gameContainer.removeChild(playerElements[removedKey]);
-  delete playerElements[removedKey];
+  const removedPlayerId = snapshot.key; // Use .key to get the ID
+  if (playerElements[removedPlayerId]) {
+    gameContainer.removeChild(playerElements[removedPlayerId]);
+    delete playerElements[removedPlayerId];
+  }
 });
+
 
 //Updates player name with text input
 playerNameInput.addEventListener("change", (e) => {
@@ -332,6 +365,8 @@ playerNameInput.addEventListener("change", (e) => {
     name: newName,
   });
 });
+
+
 
 //Update player color on button click
 playerColorButton.addEventListener("click", () => {
