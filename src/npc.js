@@ -16,80 +16,115 @@ let startPosition = { x: 2, y: 11 };
 let { x, y } = startPosition;
 let npcColor = randomFromArray(npcColors);
 let npcLeaving = false;
+let lastNpcId = 0;
+const chairPositions = [
+  { x: 10, y: 6, occupied: false },
+  { x: 9, y: 9, occupied: false },
+  { x: 4, y: 7, occupied: false },
+  { x: 7, y: 9, occupied: false },
+];
+initializeNPCs();
 
-placeNPC();
-export function placeNPC() {
-  x = startPosition.x;
-  y = startPosition.y;
-  const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
-  npcRef.set({
-    x,
-    y,
-    direction,
-    color: npcColor,
-  });
-  makeMove();
+function getNextNpcId() {
+  lastNpcId += 1;
+  return `npc${lastNpcId}`;
 }
-function makeMove() {
-  const tableX = 7;
-  const tableY = 9;
-  if (direction === "down") {
-    if (y < 11) {
-      npcLeaving = true;
-      y++;
-      updateNPCPosition(x, y, direction, npcColor);
-    } else {
-      direction = "right";
-    }
+function initializeNPCs() {
+  for (let i = 0; i < 4; i++) {
+    const id = getNextNpcId();
+    npcs[id] = {
+      id,
+      x: startPosition.x,
+      y: startPosition.y,
+      direction: "right",
+      color: randomFromArray(npcColors),
+      targetChair: randomFromArray(chairPositions),
+      npcLeaving: false,
+    };
+    placeNPC(npcs[id]);
   }
+}
 
-  if (x === tableX && y === tableY && direction !== "sitting") {
-    direction = "sitting";
-    updateNPCPosition(x, y, direction, npcColor);
+export function placeNPC(npc) {
+  const npcRef = firebase.database().ref(`npcs/${npc.id}`);
+  npcRef.set(npc);
+  makeMove(npc);
+}
+function makeMove(npc) {
+  if (npc.direction === "sitting" || npc.npcLeaving) {
     return;
   }
 
-  if (x === 7 && y > 9 && direction !== "down" && npcLeaving !== true) {
-    y--;
-    direction = "up";
-    updateNPCPosition(x, y, direction, npcColor);
-    if (y === 9) {
-      direction = "sitting";
-      updateNPCPosition(x, y, direction, npcColor);
-      return;
-    }
-  } else if (direction === "right") {
-    if (x < 13) {
-      x++;
-      updateNPCPosition(x, y, direction, npcColor);
-    } else {
-      firebase.database().ref(`npcs`).remove();
-      npcLeaving = false;
-      npcColor = randomFromArray(npcColors);
-      placeNPC();
-      return;
+  if (npc.y === 11 && npc.x < 13) {
+    npc.x++;
+    npc.direction = "right";
+
+    if (npc.x === npc.targetChair.x) {
+      if (npc.targetChair.occupied) {
+        npc.y = 11;
+        npc.npcLeaving = true;
+      } else {
+        npc.direction = "up";
+      }
     }
   }
+
+  if (npc.x === npc.targetChair.x && !npc.targetChair.occupied) {
+    if (npc.y > npc.targetChair.y) {
+      npc.y--;
+    }
+    if (npc.y === npc.targetChair.y) {
+      if (npc.targetChair.x === 4 || npc.targetChair.x === 7) {
+        npc.facing = "left";
+      } else if (npc.targetChair.x === 9 || npc.targetChair.x === 10) {
+        npc.facing = "right";
+      }
+      npc.direction = "sitting";
+      npc.targetChair.occupied = true;
+      updateNPCPosition(npc);
+    }
+  }
+
+  updateNPCPosition(npc);
+
   const moveNPCTimeouts = [1500, 2000];
-  setTimeout(makeMove, randomFromArray(moveNPCTimeouts));
+  setTimeout(() => makeMove(npc), randomFromArray(moveNPCTimeouts));
 }
 
-function updateNPCPosition(x, y, direction, color) {
-  const npcRef = firebase.database().ref(`npcs/${getKeyString(x, y)}`);
-  npcRef.set({ x, y, direction, color });
-  console.log(direction);
+function updateNPCPosition(npc) {
+  const npcKey = getKeyString(npc.x, npc.y);
+  const npcRef = firebase.database().ref(`npcs/${npc.id}`);
+  npcRef.update({
+    x: npc.x,
+    y: npc.y,
+    direction: npc.direction,
+    color: npc.color,
+  });
 
-  const npcElement = npcsElements[getKeyString(x, y)];
+  const npcElement = npcsElements[npc.id];
   if (npcElement) {
-    npcElement.setAttribute("data-direction", direction);
-    npcElement.setAttribute("data-color", color);
+    npcElement.setAttribute("data-direction", npc.direction);
+    npcElement.setAttribute("data-color", npc.color);
+    if (npc.direction === "sitting") {
+      npcElement.setAttribute("data-facing", npc.facing);
+      npcElement.classList.remove(
+        "walking",
+        "idle",
+        "right",
+        "left",
+        "up",
+        "down"
+      );
+      npcElement.classList.add("sitting");
+    } else {
+      npcElement.classList.remove("sitting");
+    }
   }
-  let oldX = x,
-    oldY = y;
-  switch (direction) {
-    case x === 7 && y === 9 && direction === "up":
-      direction == "sitting";
-      break;
+
+  let oldX = npc.x;
+  let oldY = npc.y;
+
+  switch (npc.direction) {
     case "right":
       oldX -= 1;
       break;
@@ -103,13 +138,19 @@ function updateNPCPosition(x, y, direction, color) {
       oldY -= 1;
       break;
     case "sitting":
-      orderFoodOrDrink(x, y);
-      break;
+      orderFoodOrDrink(npc);
+      return;
   }
 
   const oldKey = getKeyString(oldX, oldY);
-  if (direction !== "sitting" && oldKey !== getKeyString(x, y)) {
+  if (npc.direction !== "sitting" && oldKey !== npcKey) {
     firebase.database().ref(`npcs/${oldKey}`).remove();
+  }
+  if (npc.direction === "sitting") {
+    const facingDirection = npc.facing === "left" ? "left" : "right";
+    const sittingClass = `sitting_${npc.color}_${facingDirection}`;
+    npcElement.classList.add(sittingClass);
+    npcElement.setAttribute("data-facing", npc.facing);
   }
 }
 export function interactWithNpc(npcKey, npc) {
@@ -139,16 +180,14 @@ export function interactWithNpc(npcKey, npc) {
   }
 }
 
-function orderFoodOrDrink(x, y) {
+function orderFoodOrDrink(npc) {
   const options = ["pizza", "coffee"];
   const order = randomFromArray(options);
 
-  const npcKey = getKeyString(x, y);
-  const npcRef = firebase.database().ref(`npcs/${npcKey}`);
-  npcRef.update({
-    order: order,
-  });
-  const npcElement = npcsElements[npcKey];
+  const npcRef = firebase.database().ref(`npcs/${npc.id}`);
+  npcRef.update({ order: order });
+
+  const npcElement = npcsElements[getKeyString(npc.x, npc.y)];
   if (npcElement) {
     showOrder(npcElement, order);
   }
@@ -184,24 +223,21 @@ allNPCSRef.on("value", (snapshot) => {
 });
 allNPCSRef.on("child_added", (snapshot) => {
   const npc = snapshot.val();
-  const key = getKeyString(npc.x, npc.y);
-  npcs[key] = npc; // Store the whole NPC object
+  npcs[npc.id] = npc;
 
   const npcElement = document.createElement("div");
   npcElement.classList.add("NPC", "grid-cell");
   npcElement.setAttribute("data-color", npc.color);
-  npcElement.innerHTML = `
-      <div class="Npc_sprite grid-cell"></div>
-    `;
+  npcElement.setAttribute("data-direction", npc.direction);
+  npcElement.innerHTML = `<div class="Npc_sprite grid-cell"></div>`;
 
   const left = 16 * npc.x + "px";
   const top = 16 * npc.y - 4 + "px";
   npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
 
-  npcsElements[key] = npcElement;
+  npcsElements[npc.id] = npcElement;
   gameContainer.appendChild(npcElement);
 
-  // Check if this NPC has an order and display it
   if (npc.order) {
     showOrder(npcElement, npc.order);
   }
@@ -209,30 +245,34 @@ allNPCSRef.on("child_added", (snapshot) => {
 
 allNPCSRef.on("child_changed", (snapshot) => {
   const npc = snapshot.val();
-  const key = getKeyString(npc.x, npc.y);
+  const npcKey = getKeyString(npc.x, npc.y);
 
-  npcs[key] = npc;
+  npcs[npc.id] = npc;
 
-  if (npc.order) {
-    const npcElement = npcsElements[key];
-    if (npcElement) {
+  const npcElement = npcsElements[npc.id];
+  if (npcElement) {
+    const left = 16 * npc.x + "px";
+    const top = 16 * npc.y - 4 + "px";
+    npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+    npcElement.setAttribute("data-direction", npc.direction);
+    npcElement.setAttribute("data-color", npc.color);
+
+    if (npc.order) {
       showOrder(npcElement, npc.order);
     }
+  } else {
+    console.error("NPC Element not found for ID:", npc.id);
   }
 });
 
 allNPCSRef.on("child_removed", (snapshot) => {
-  const { x, y } = snapshot.val();
-  const keyToRemove = getKeyString(x, y);
-  const npcElement = npcsElements[keyToRemove];
+  const npcId = snapshot.key;
 
+  const npcElement = npcsElements[npcId];
   if (npcElement && npcElement.parentNode) {
     npcElement.parentNode.removeChild(npcElement);
-    delete npcsElements[keyToRemove];
+    delete npcsElements[npcId];
   } else {
-    console.error(
-      "NPC Element not found or already removed for key:",
-      keyToRemove
-    );
+    console.error("NPC Element not found or already removed for ID:", npcId);
   }
 });

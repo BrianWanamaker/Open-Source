@@ -7,10 +7,12 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: linear-gradient(180deg,
-      #64beff -50%,
-      #6e96ff 69.71%,
-      #2a65ff 150%);
+  background: linear-gradient(
+    180deg,
+    #64beff -50%,
+    #6e96ff 69.71%,
+    #2a65ff 150%
+  );
   font-family: "Source Sans Pro", sans-serif;
   display: flex;
   align-items: center;
@@ -148,31 +150,37 @@ button:active {
   background: url("images/KickCharacterSpriteSheet.gif");
 }
 
-.Character[data-animation-state="kick"][data-color="blue"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="kick"][data-color="blue"][data-direction="left"]
+  .Character_sprite {
   background-position-y: 0px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="kick"][data-color="blue"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="kick"][data-color="blue"][data-direction="right"]
+  .Character_sprite {
   background-position-x: 15px;
 }
 
-.Character[data-animation-state="kick"][data-color="red"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="kick"][data-color="red"][data-direction="right"]
+  .Character_sprite {
   background-position-y: -17px;
   background-position-x: 15px;
 }
 
-.Character[data-animation-state="kick"][data-color="red"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="kick"][data-color="red"][data-direction="left"]
+  .Character_sprite {
   background-position-y: -17px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="kick"][data-color="orange"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="kick"][data-color="orange"][data-direction="left"]
+  .Character_sprite {
   background-position-y: -36px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="kick"][data-color="orange"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="kick"][data-color="orange"][data-direction="right"]
+  .Character_sprite {
   background-position-x: -14px;
   background-position-y: -36px;
 }
@@ -181,77 +189,86 @@ button:active {
   background: url("images/HitCharacterSpriteSheet.gif");
 }
 
-.Character[data-animation-state="hit"][data-color="blue"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="hit"][data-color="blue"][data-direction="left"]
+  .Character_sprite {
   background-position-y: 0px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="hit"][data-color="blue"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="hit"][data-color="blue"][data-direction="right"]
+  .Character_sprite {
   background-position-x: 15px;
 }
 
-.Character[data-animation-state="hit"][data-color="red"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="hit"][data-color="red"][data-direction="right"]
+  .Character_sprite {
   background-position-y: -17px;
   background-position-x: 15px;
 }
 
-.Character[data-animation-state="hit"][data-color="red"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="hit"][data-color="red"][data-direction="left"]
+  .Character_sprite {
   background-position-y: -17px;
   background-position-x: 1px;
 }
 
-.Character[data-animation-state="hit"][data-color="orange"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="hit"][data-color="orange"][data-direction="left"]
+  .Character_sprite {
   background-position-y: -36px;
   background-position-x: 0px;
 }
 
-.Character[data-animation-state="hit"][data-color="orange"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="hit"][data-color="orange"][data-direction="right"]
+  .Character_sprite {
   background-position-x: -15px;
   background-position-y: -36px;
 }
-
-
 
 .Character[data-animation-state="pickedUp"] .Character_sprite {
   background: url("images/SSpickedUp.gif");
 }
 
-.Character[data-animation-state="pickedUp"][data-color="blue"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="pickedUp"][data-color="blue"][data-direction="left"]
+  .Character_sprite {
   background-position-y: 0px;
   background-position-x: 0px;
   width: 18px;
   height: 25px;
-
 }
 
-.Character[data-animation-state="pickedUp"][data-color="blue"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="pickedUp"][data-color="blue"][data-direction="right"]
+  .Character_sprite {
   background-position-x: 17px;
   width: 18px;
   height: 25px;
 }
 
-.Character[data-animation-state="pickedUp"][data-color="red"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="pickedUp"][data-color="red"][data-direction="right"]
+  .Character_sprite {
   background-position-y: -25px;
   background-position-x: 17px;
   width: 18px;
   height: 22px;
 }
 
-.Character[data-animation-state="pickedUp"][data-color="red"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="pickedUp"][data-color="red"][data-direction="left"]
+  .Character_sprite {
   background-position-y: -25px;
   background-position-x: 0px;
   width: 18px;
   height: 22px;
 }
 
-.Character[data-animation-state="pickedUp"][data-color="orange"][data-direction="left"] .Character_sprite {
+.Character[data-animation-state="pickedUp"][data-color="orange"][data-direction="left"]
+  .Character_sprite {
   background-position-y: -50px;
   background-position-x: 0px;
   width: 18px;
   height: 23px;
 }
 
-.Character[data-animation-state="pickedUp"][data-color="orange"][data-direction="right"] .Character_sprite {
+.Character[data-animation-state="pickedUp"][data-color="orange"][data-direction="right"]
+  .Character_sprite {
   background-position-y: -50px;
   background-position-x: 17px;
   width: 18px;
@@ -324,10 +341,17 @@ button:active {
   transition: transform 0.4s;
 }
 .Npc_sprite {
-  background: url(/images/right.gif) no-repeat no-repeat;
+  background: url(/images/sitting.gif) no-repeat no-repeat;
   width: 16px;
   height: 16px;
   transition: transform 0.4s;
+}
+.NPC.sitting .Npc_sprite {
+  animation: none;
+  background: none;
+}
+.NPC.sitting .Npc_sprite {
+  background-image: url(/images/sitting.gif);
 }
 
 .NPC[data-direction="right"] .Npc_sprite {
@@ -342,10 +366,6 @@ button:active {
   background: url(/images/up.gif) no-repeat no-repeat;
 }
 
-.NPC[data-direction="sitting"] .Npc_sprite {
-  background: url(/images/sitting.gif) no-repeat no-repeat;
-}
-
 .NPC[data-color="green"][data-direction="right"] .Npc_sprite {
   background-image: url(images/right.gif);
 }
@@ -354,11 +374,15 @@ button:active {
   background-image: url(images/up.gif);
 }
 
-.NPC[data-color="green"][data-direction="sitting"] .Npc_sprite {
-  background-image: url("/images/sitting.gif");
+.NPC[data-color="green"][data-direction="sitting"][data-facing="left"].Npc_sprite {
+  background-image: url(/images/sitting.gif);
+}
+.NPC[data-color="green"][data-direction="sitting"][data-facing="right"]
+  .Npc_sprite {
+  background-image: url(/images/sitting_green_right.gif);
 }
 .NPC[data-color="green"][data-direction="down"] .Npc_sprite {
-  background-image: url("/images/down.gif");
+  background-image: url(/images/down.gif);
 }
 
 .NPC[data-color="blue"][data-direction="right"] .Npc_sprite {
@@ -368,11 +392,16 @@ button:active {
 .NPC[data-color="blue"][data-direction="up"] .Npc_sprite {
   background-image: url(images/up_blue.gif);
 }
-.NPC[data-color="blue"][data-direction="sitting"] .Npc_sprite {
-  background-image: url("/images/sitting_blue.gif");
+.NPC[data-color="blue"][data-direction="sitting"][data-facing="left"]
+  .Npc_sprite {
+  background-image: url(/images/sitting_blue.gif);
+}
+.NPC[data-color="blue"][data-direction="sitting"][data-facing="right"]
+  .Npc_sprite {
+  background-image: url(/images/sitting_blue_right.gif);
 }
 .NPC[data-color="blue"][data-direction="down"] .Npc_sprite {
-  background-image: url("/images/down_blue.gif");
+  background-image: url(/images/down_blue.gif);
 }
 
 .NPC[data-color="yellow"][data-direction="right"] .Npc_sprite {
@@ -383,11 +412,16 @@ button:active {
   background-image: url(images/up_yellow.gif);
 }
 
-.NPC[data-color="yellow"][data-direction="sitting"] .Npc_sprite {
-  background-image: url("/images/sitting_yellow.gif");
+.NPC[data-color="yellow"][data-direction="sitting"][data-facing="left"]
+  .Npc_sprite {
+  background-image: url(/images/sitting_yellow.gif);
+}
+.NPC[data-color="yellow"][data-direction="sitting"][data-facing="right"]
+  .Npc_sprite {
+  background-image: url(/images/sitting_yellow_right.gif);
 }
 .NPC[data-color="yellow"][data-direction="down"] .Npc_sprite {
-  background-image: url("/images/down_yellow.gif");
+  background-image: url(/images/down_yellow.gif);
 }
 
 /* NPC Order Bubble */
