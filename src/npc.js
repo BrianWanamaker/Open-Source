@@ -24,24 +24,110 @@ const chairPositions = [
   { x: 7, y: 9, occupied: false },
 ];
 initializeNPCs();
-
-function getNextNpcId() {
-  lastNpcId += 1;
-  return `npc${lastNpcId}`;
-}
 function initializeNPCs() {
-  for (let i = 0; i < 4; i++) {
-    const id = getNextNpcId();
-    npcs[id] = {
-      id,
-      x: startPosition.x,
-      y: startPosition.y,
-      direction: "right",
-      color: randomFromArray(npcColors),
-      targetChair: randomFromArray(chairPositions),
-      npcLeaving: false,
-    };
-    placeNPC(npcs[id]);
+  const npcInitRef = firebase.database().ref("npcInitStatus");
+  npcInitRef.transaction(
+    (current) => {
+      if (current === null) {
+        return "initializing";
+      } else {
+        return;
+      }
+    },
+    (error, committed, snapshot) => {
+      if (error) {
+        console.log("Transaction failed abnormally!", error);
+      } else if (committed) {
+        createNpcWithDelay(0);
+        npcInitRef.set("completed");
+      } else {
+        console.log("NPCs are already being initialized by another client.");
+        allNPCSRef.once("value", (snapshot) => {
+          if (snapshot.exists()) {
+            npcs = snapshot.val();
+            Object.values(npcs).forEach((npc) => {
+              if (!npcsElements[npc.id]) {
+                createNpcElement(npc);
+              }
+            });
+          }
+        });
+      }
+    }
+  );
+}
+
+function createNpcWithDelay(index) {
+  if (index < 4) {
+    getNextNpcId((id) => {
+      npcs[id] = {
+        id,
+        x: startPosition.x,
+        y: startPosition.y,
+        direction: "right",
+        color: randomFromArray(npcColors),
+        targetChair: randomFromArray(chairPositions),
+        npcLeaving: false,
+      };
+      placeNPC(npcs[id]);
+      setTimeout(
+        () => createNpcWithDelay(index + 1),
+        randomFromArray([3000, 4000, 5000])
+      );
+    });
+  }
+}
+function updateNpcElement(npc) {
+  const npcElement = npcsElements[npc.id];
+  if (npcElement) {
+    const left = 16 * npc.x + "px";
+    const top = 16 * npc.y - 4 + "px";
+    npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+    npcElement.setAttribute("data-direction", npc.direction);
+    npcElement.setAttribute("data-color", npc.color);
+
+    npcElement.className = "NPC grid-cell";
+    npcElement.classList.add(npc.direction);
+    npcElement.classList.add(npc.color);
+
+    if (npc.order) {
+      showOrder(npcElement, npc.order);
+    }
+  } else {
+    console.error("NPC Element not found for ID:", npc.id);
+    createNpcElement(npc);
+  }
+}
+
+function getNextNpcId(callback) {
+  const idRef = firebase.database().ref("lastNpcId");
+  idRef.transaction(
+    (current) => {
+      return (current || 0) + 1;
+    },
+    (error, committed, snapshot) => {
+      if (committed) {
+        callback(`npc${snapshot.val()}`);
+      }
+    }
+  );
+}
+function createNpcElement(npc) {
+  const npcElement = document.createElement("div");
+  npcElement.classList.add("NPC", "grid-cell");
+  npcElement.setAttribute("data-color", npc.color);
+  npcElement.setAttribute("data-direction", npc.direction);
+  npcElement.innerHTML = `<div class="Npc_sprite grid-cell"></div>`;
+
+  const left = 16 * npc.x + "px";
+  const top = 16 * npc.y - 4 + "px";
+  npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+
+  npcsElements[npc.id] = npcElement;
+  gameContainer.appendChild(npcElement);
+
+  if (npc.order) {
+    showOrder(npcElement, npc.order);
   }
 }
 
@@ -223,56 +309,37 @@ allNPCSRef.on("value", (snapshot) => {
 });
 allNPCSRef.on("child_added", (snapshot) => {
   const npc = snapshot.val();
-  npcs[npc.id] = npc;
-
-  const npcElement = document.createElement("div");
-  npcElement.classList.add("NPC", "grid-cell");
-  npcElement.setAttribute("data-color", npc.color);
-  npcElement.setAttribute("data-direction", npc.direction);
-  npcElement.innerHTML = `<div class="Npc_sprite grid-cell"></div>`;
-
-  const left = 16 * npc.x + "px";
-  const top = 16 * npc.y - 4 + "px";
-  npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
-
-  npcsElements[npc.id] = npcElement;
-  gameContainer.appendChild(npcElement);
-
-  if (npc.order) {
-    showOrder(npcElement, npc.order);
+  if (!npcs[npc.id]) {
+    npcs[npc.id] = npc;
+    createNpcElement(npc);
   }
 });
 
 allNPCSRef.on("child_changed", (snapshot) => {
   const npc = snapshot.val();
-  const npcKey = getKeyString(npc.x, npc.y);
-
-  npcs[npc.id] = npc;
-
-  const npcElement = npcsElements[npc.id];
-  if (npcElement) {
-    const left = 16 * npc.x + "px";
-    const top = 16 * npc.y - 4 + "px";
-    npcElement.style.transform = `translate3d(${left}, ${top}, 0)`;
-    npcElement.setAttribute("data-direction", npc.direction);
-    npcElement.setAttribute("data-color", npc.color);
-
-    if (npc.order) {
-      showOrder(npcElement, npc.order);
-    }
-  } else {
-    console.error("NPC Element not found for ID:", npc.id);
+  if (npcs[npc.id]) {
+    npcs[npc.id] = npc;
+    updateNpcElement(npc);
   }
 });
 
 allNPCSRef.on("child_removed", (snapshot) => {
   const npcId = snapshot.key;
-
   const npcElement = npcsElements[npcId];
   if (npcElement && npcElement.parentNode) {
     npcElement.parentNode.removeChild(npcElement);
     delete npcsElements[npcId];
+    delete npcs[npcId];
   } else {
     console.error("NPC Element not found or already removed for ID:", npcId);
   }
 });
+// firebase
+//   .database()
+//   .ref("players")
+//   .on("value", (snapshot) => {
+//     console.log("snapshot val: " + snapshot.val());
+//     if (!snapshot.exists() || snapshot.val() === null) {
+//       firebase.database().ref("npcs").remove();
+//     }
+//   });

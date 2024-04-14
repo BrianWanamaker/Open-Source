@@ -20,7 +20,6 @@ export let players = {};
 export let playerElements = {};
 export let carryingPlayerId = null; // Add this near your other global variable declarations
 
-
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
 new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
 new KeyPressListener("ArrowLeft", () => handleArrowPress(-1, 0));
@@ -47,9 +46,6 @@ export function handleArrowPress(xChange = 0, yChange = 0) {
   checkForNpcInteraction(newX, newY);
 }
 
-
-
-
 function checkForNpcInteraction(playerX, playerY) {
   Object.keys(npcs).forEach((npcKey) => {
     const npc = npcs[npcKey];
@@ -60,21 +56,21 @@ function checkForNpcInteraction(playerX, playerY) {
 }
 
 allPlayersRef.on("value", (snapshot) => {
- // Fires whenever a change occurs
- players = snapshot.val() || {};
- Object.keys(players).forEach((key) => {
-   const characterState = players[key];
-   let el = playerElements[key];
-   if (!el) {
-     console.error('No element found for player:', key);
-     return; // Skip this iteration if the element doesn't exist
-   }
+  // Fires whenever a change occurs
+  players = snapshot.val() || {};
+  Object.keys(players).forEach((key) => {
+    const characterState = players[key];
+    let el = playerElements[key];
+    if (!el) {
+      console.error("No element found for player:", key);
+      return; // Skip this iteration if the element doesn't exist
+    }
     // Update visibility based on the new `isVisible` property
     if (characterState.isVisible === false) {
       el.style.display = "none";
     } else {
       el.style.display = ""; // Or whatever display was initially ('block', 'flex', etc.)
-    };
+    }
     // Now update the DOM
     el.querySelector(".Character_name").innerText = characterState.name;
     el.querySelector(".Character_coins").innerText = characterState.coins;
@@ -164,7 +160,6 @@ function updateAnimationState() {
   }
 }
 
-
 document.addEventListener("keydown", function (event) {
   let keyHandled = false;
   if (event.key === "ArrowUp") {
@@ -193,7 +188,6 @@ document.addEventListener("keydown", function (event) {
       attemptToPickUpPlayer();
     }
     event.preventDefault(); // Prevent default action
-  
   } else if (event.key === "t") {
     attemptToThrowPlayer();
   }
@@ -265,12 +259,16 @@ function performKick() {
 
 function attemptToPickUpPlayer() {
   Object.keys(players).forEach(function (id) {
-    if (id !== playerId && !carryingPlayerId) { // Ensure Player A is not already carrying another player
+    if (id !== playerId && !carryingPlayerId) {
+      // Ensure Player A is not already carrying another player
       const otherPlayer = players[id];
       const distanceX = Math.abs(players[playerId].x - otherPlayer.x);
       const distanceY = Math.abs(players[playerId].y - otherPlayer.y);
 
-      if ((distanceX === 1 && distanceY === 0) || (distanceX === 0 && distanceY === 1)) {
+      if (
+        (distanceX === 1 && distanceY === 0) ||
+        (distanceX === 0 && distanceY === 1)
+      ) {
         carryingPlayerId = id;
 
         // Update Player A's animation state to "pickingUp"
@@ -295,8 +293,6 @@ function attemptToPickUpPlayer() {
   });
 }
 
-
-
 const throwDistance = 2; // Tiles the player can be thrown
 
 function attemptToThrowPlayer() {
@@ -307,10 +303,18 @@ function attemptToThrowPlayer() {
 
     // Adjust newX and newY based on the direction
     switch (direction) {
-      case "up": newY -= throwDistance; break;
-      case "down": newY += throwDistance; break;
-      case "left": newX -= throwDistance; break;
-      case "right": newX += throwDistance; break;
+      case "up":
+        newY -= throwDistance;
+        break;
+      case "down":
+        newY += throwDistance;
+        break;
+      case "left":
+        newX -= throwDistance;
+        break;
+      case "right":
+        newX += throwDistance;
+        break;
     }
 
     if (!isSolid(newX, newY) && withinBoundaries(newX, newY)) {
@@ -318,13 +322,12 @@ function attemptToThrowPlayer() {
         x: newX,
         y: newY,
         isVisible: true,
-        animationState: "idle", 
+        animationState: "idle",
         isCarried: false,
       };
 
-      // Update Firebase with the new position 
+      // Update Firebase with the new position
       firebase.database().ref(`players/${carryingPlayerId}`).update(updates);
-
 
       carryingPlayerId = null; // No longer carrying
     } else {
@@ -332,12 +335,6 @@ function attemptToThrowPlayer() {
     }
   }
 }
-
-
-
-
-
-
 
 function withinBoundaries(x, y) {
   return (
@@ -356,7 +353,6 @@ allPlayersRef.on("child_removed", (snapshot) => {
   }
 });
 
-
 //Updates player name with text input
 playerNameInput.addEventListener("change", (e) => {
   const newName = e.target.value || createName();
@@ -366,8 +362,6 @@ playerNameInput.addEventListener("change", (e) => {
   });
 });
 
-
-
 //Update player color on button click
 playerColorButton.addEventListener("click", () => {
   const mySkinIndex = playerColors.indexOf(players[playerId].color);
@@ -376,7 +370,6 @@ playerColorButton.addEventListener("click", () => {
     color: nextColor,
   });
 });
-
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     //You're logged in!
