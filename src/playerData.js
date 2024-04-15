@@ -24,7 +24,7 @@ export let carryingPlayerId = null; // Add this near your other global variable 
 let escapeKeyPressCount = 0;
 const ESCAPE_KEY_PRESS_LIMIT = 5;  // Number of key presses needed to escape
 
-const WIN_COIN_COUNT = 5; // The coin count needed to win the game
+const WIN_COIN_COUNT = 50; // The coin count needed to win the game
 
 
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
@@ -62,13 +62,7 @@ function checkForNpcInteraction(playerX, playerY) {
   });
 }
 
-// Listen for changes in the game state
-firebase.database().ref('gameState').on('value', (snapshot) => {
-  const state = snapshot.val();
-  if (state && state.gameEnded) {
-    showWinPopup(state.winnerId);
-  }
-});
+
 
 function showWinPopup(winningPlayerId) {
   const isLocalPlayerWinner = playerId === winningPlayerId;
@@ -108,15 +102,11 @@ function showWinPopup(winningPlayerId) {
 }
 
 
-
-
 export function checkWinCondition(playerId) {
   const player = players[playerId];
   if (player.coins >= WIN_COIN_COUNT) {
-    player.hasWon = true;
-    // Update the player's win state in Firebase
-    playerRef.update({ hasWon: true });
-    // Update the game state in Firebase
+    // The player has won
+    console.log(`Player ${playerId} wins with ${player.coins} coins.`);
     firebase.database().ref('gameState').set({
       gameEnded: true,
       winnerId: playerId
@@ -126,9 +116,8 @@ export function checkWinCondition(playerId) {
 
 
 
-
 allPlayersRef.on("value", (snapshot) => {
-  // Fires whenever a change occurs
+
   players = snapshot.val() || {};
   Object.keys(players).forEach((key) => {
     const characterState = players[key];
@@ -234,83 +223,60 @@ function updateAnimationState() {
 
 
 document.addEventListener("keydown", function (event) {
-  // Handle movement keys
+  console.log("Key pressed:", event.key); // Debug key presses
+
   let keyHandled = false;
-  if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowLeft" || event.key === "ArrowRight") {
-    handleMovement(event.key); // Assuming you refactor movement handling into this function
+
+  // Handle movement keys
+  if (event.key === "ArrowUp") {
+    movementFlags.up = true;
     keyHandled = true;
-  }
-
-  if (event.key === "e" || event.key === "E") {
-    if (players[playerId].isCarried) {
-      escapeKeyPressCount++;
-      console.log(`Escape attempt ${escapeKeyPressCount}/5 for player ${playerId}`);
-
-      if (escapeKeyPressCount >= ESCAPE_KEY_PRESS_LIMIT) {
-        putDownPlayer(playerId);  // Assuming the current player's ID is the carried player
-        escapeKeyPressCount = 0;  // Reset the count after escaping
-      }
-      event.preventDefault();
-    }
-  }
-
-  // Additional key handling
-  if (event.key === "k") {
-    // Example: handle 'k' for kick
-    handleKick();
+  } else if (event.key === "ArrowDown") {
+    movementFlags.down = true;
+    keyHandled = true;
+  } else if (event.key === "ArrowLeft") {
+    movementFlags.left = true;
+    keyHandled = true;
+  } else if (event.key === "ArrowRight") {
+    movementFlags.right = true;
+    keyHandled = true;
+  } else if (event.key === "k") {
+    performKick();
+    playerRef.update({ animationState: "kick" });
     keyHandled = true;
   } else if (event.key === "p") {
-    // Example: handle 'p' for pick up
-    attemptToPickUpPlayer();
-    event.preventDefault();
+    if (!carryingPlayerId) {
+      attemptToPickUpPlayer();
+    }
+    keyHandled = true;
   } else if (event.key === "t") {
-    // Example: handle 't' for throw
     attemptToThrowPlayer();
-    event.preventDefault();
+    keyHandled = true;
+  } else if (event.key === "e" && players[playerId].isCarried) {
+    console.log(`Escape attempt by player ${playerId}`);
+    escapeKeyPressCount++;
+    if (escapeKeyPressCount >= ESCAPE_KEY_PRESS_LIMIT) {
+      escapePlayer();
+    }
+    keyHandled = true;
   }
 
   if (keyHandled) {
-    event.preventDefault(); // General prevent default if any key was handled
+    event.preventDefault();
     updateAnimationState();
   }
 });
 
-function putDownPlayer(carriedPlayerId) {
-  if (carriedPlayerId && players[carriedPlayerId].isCarried) {
-    // Resetting the player to a state of not being carried
-    firebase.database().ref(`players/${carriedPlayerId}`).update({
-      isCarried: false,
-      isVisible: true,
-      animationState: "idle",  // Reset the carried player to 'idle' or another appropriate state
-      escapeKeyPressCount: 0   // Reset the escape key press count
-    });
 
-    // Also update the carrier's animation state
-    if (carryingPlayerId) {
-      firebase.database().ref(`players/${carryingPlayerId}`).update({
-        animationState: "idle"  // Reset the carrier to 'idle'
-      });
-    }
 
-    carryingPlayerId = null;  // Clear the carryingPlayerId
-    console.log(`Player ${carriedPlayerId} has been put down.`);
-    broadcastAnimationStateReset();
+firebase.database().ref('gameState').on('value', (snapshot) => {
+  const state = snapshot.val();
+  console.log("Current game state:", state);  // Log the current game state to debug
+  if (state && state.gameEnded) {
+    console.log("Game has ended, showing win popup.");
+    showWinPopup(state.winnerId);
   }
-}
-
-// Additional function to reset the animation state of all players
-function broadcastAnimationStateReset() {
-  Object.keys(players).forEach(playerKey => {
-    firebase.database().ref(`players/${playerKey}`).update({
-      animationState: "idle"
-    });
-  });
-}
-
-
-// You would need to ensure other player state updates like 'isCarried' are properly managed elsewhere in your code.
-
-
+});
 
 
 

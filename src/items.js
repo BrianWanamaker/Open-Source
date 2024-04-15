@@ -1,5 +1,5 @@
 import { gameContainer } from "./misc.js";
-import { playerId, playerElements, players, playerRef } from "./playerData.js";
+import { playerId, playerElements, players, playerRef, checkWinCondition } from "./playerData.js";
 
 let pizzaX = 7;
 let pizzaY = 7;
@@ -191,6 +191,7 @@ export function playerLosesPizza() {
 
 export function playerScoresPoints(points) {
   playerRef.update({
-    coins: players[playerId].coins + points,
+    coins: players[playerId].coins + points, 
   });
+  checkWinCondition(playerId);
 }
