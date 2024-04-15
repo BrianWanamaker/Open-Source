@@ -71,7 +71,7 @@ function createNpcWithDelay(index) {
       placeNPC(npcs[id]);
       setTimeout(
         () => createNpcWithDelay(index + 1),
-        randomFromArray([5000, 600, 7000, 8000, 9000])
+        randomFromArray([7000, 8000, 9000, 10000, 11000])
       );
     });
   }
@@ -162,8 +162,11 @@ function makeMove(npc) {
 
     if (npc.x === npc.targetChair.x) {
       if (npc.targetChair.occupied) {
-        npc.y = 11;
         npc.npcLeaving = true;
+        npc.direction = "down";
+        updateNPCPosition(npc);
+        makeMove(npc);
+        return;
       } else {
         npc.direction = "up";
       }
@@ -182,6 +185,15 @@ function makeMove(npc) {
       }
       npc.direction = "sitting";
       npc.targetChair.occupied = true;
+
+      const chairIndex = chairPositions.findIndex((chair) => {
+        return chair.x === npc.targetChair.x && chair.y === npc.targetChair.y;
+      });
+
+      if (chairIndex !== -1) {
+        const chairsRef = firebase.database().ref(`chairs/${chairIndex}`);
+        chairsRef.update({ occupied: true });
+      }
       orderFoodOrDrink(npc);
     }
   }
@@ -234,7 +246,7 @@ export function interactWithNpc(npcKey, npc) {
         playerLosesPizza();
       }
       playerScoresPoints(10);
-      
+
 
       npc.order = null;
       clearOrder(npc);
@@ -340,4 +352,33 @@ function removeNPC(npc) {
     gameContainer.removeChild(npcElement);
     delete npcsElements[npc.id];
   }
+  checkForRemainingNPCs();
+}
+function checkForRemainingNPCs() {
+  allNPCSRef.once("value", (snapshot) => {
+    const npcsData = snapshot.val();
+
+    if (npcsData && Object.keys(npcsData).length <= 1) {
+      chairPositions.forEach((chair, index) => {
+        chairPositions[index].occupied = false;
+      });
+
+      const chairsRef = firebase.database().ref("chairs");
+      chairPositions.forEach((chair, index) => {
+        chairsRef.child(index).update({ occupied: false });
+      });
+
+      console.log("All chair positions have been reset to unoccupied:");
+      chairPositions.forEach((chair, index) => {
+        console.log(
+          `Chair ${index}: x=${chair.x}, y=${chair.y}, occupied=${chair.occupied}`
+        );
+      });
+
+      setTimeout(
+        () => createNpcWithDelay(1),
+        randomFromArray([7000, 8000, 9000, 10000, 11000])
+      );
+    }
+  });
 }
