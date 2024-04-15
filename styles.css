@@ -589,3 +589,84 @@ button:active {
   max-width: 80%;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+.win-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 10px; /* Sufficient padding while maintaining compactness */
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  width: 90%; /* Adjust width to fit more content if necessary */
+  max-width: 400px; /* Adjust max width based on typical device screen sizes */
+  max-height: 85vh; /* Max height to avoid scrolling, vh unit ensures it scales with the view height */
+  overflow-y: auto; /* Allows internal scrolling if absolutely necessary */
+  z-index: 1000;
+}
+
+.leaderboard {
+  list-style-type: decimal; /* Numbered list to indicate ranking */
+  padding: 0;
+  margin: 5px 0; /* Compact margins */
+  font-size: 12px; /* Smaller font to fit more entries */
+  max-height: 50vh; /* Limits the height of the leaderboard list */
+  overflow-y: auto; /* Enable scrolling within the leaderboard if needed */
+}
+
+.leaderboard li {
+  border-bottom: 1px solid #ddd;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between; /* Ensures spacing between names and scores */
+  white-space: nowrap; /* Prevents text wrapping */
+}
+
+.leaderboard li.winner {
+  color: #4A90E2; /* Highlight winner */
+  font-weight: bold;
+}
+
+h2, h3 {
+  font-size: 16px; /* Appropriate size for headers */
+  margin: 3px 0; /* Compact vertical spacing */
+}
+
+.status-message {
+  font-size: 14px;
+  margin-bottom: 5px; /* Space management */
+}
+
+button {
+  background-color: #4CAF50; /* Green background */
+  color: white;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #45a049; /* Darker green */
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboard li.winner {
+  color: #4A90E2;
+  font-weight: bold;
+}
+
+.leaderboard li .play-icon {
+  font-size: 16px; /* Size of the icon */
+}

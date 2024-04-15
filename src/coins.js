@@ -1,6 +1,6 @@
 import { getRandomSafeSpot, getKeyString, randomFromArray } from "./misc.js";
 import { gameContainer } from "./misc.js";
-import { playerId, playerRef, players } from "./playerData.js";
+import { playerId, playerRef, players, checkWinCondition } from "./playerData.js";
 
 export let coins = {};
 let coinElements = {};
@@ -26,6 +26,9 @@ export function attemptGrabCoin(x, y) {
     firebase.database().ref(`coins/${key}`).remove();
     playerRef.update({
       coins: players[playerId].coins + 1,
+    }).then(() => {
+      // After updating coins, check the win condition
+      checkWinCondition(playerId);
     });
   }
 }
