@@ -247,7 +247,6 @@ export function interactWithNpc(npcKey, npc) {
         playerLosesPizza();
       }
       playerScoresPoints(10);
-      checkWinCondition(playerId);
 
       npc.order = null;
       clearOrder(npc);
