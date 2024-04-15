@@ -24,7 +24,7 @@ export let carryingPlayerId = null; // Add this near your other global variable 
 let escapeKeyPressCount = 0;
 const ESCAPE_KEY_PRESS_LIMIT = 5;  // Number of key presses needed to escape
 
-const WIN_COIN_COUNT = 50; // The coin count needed to win the game
+const WIN_COIN_COUNT = 5; // The coin count needed to win the game
 
 
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
