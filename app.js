@@ -5,5 +5,8 @@ import { placeCoin } from "./src/coins.js";
 import { chat } from "./src/chat.js";
 
 export function initGame() {
-  //Place my first coin
+  firebase.database().ref('gameState').set({
+    gameEnded: false,
+    winnerId: null
+  });
 }
