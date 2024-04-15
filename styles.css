@@ -595,7 +595,7 @@ button:active {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255);
   padding: 10px; /* Sufficient padding while maintaining compactness */
   border-radius: 8px;
   text-align: center;

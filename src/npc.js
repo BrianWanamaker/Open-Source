@@ -1,6 +1,5 @@
 import { npcColors, randomFromArray, getKeyString } from "./misc.js";
 import { gameContainer } from "./misc.js";
-import { checkWinCondition } from "./playerData.js";
 import {
   playerHasCoffee,
   playerHasPizza,
@@ -247,6 +246,7 @@ export function interactWithNpc(npcKey, npc) {
         playerLosesPizza();
       }
       playerScoresPoints(10);
+
 
       npc.order = null;
       clearOrder(npc);
