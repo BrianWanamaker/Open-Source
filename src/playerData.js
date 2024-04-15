@@ -20,6 +20,13 @@ export let players = {};
 export let playerElements = {};
 export let carryingPlayerId = null; // Add this near your other global variable declarations
 
+// Add this near your other global variable declarations
+let escapeKeyPressCount = 0;
+const ESCAPE_KEY_PRESS_LIMIT = 5;  // Number of key presses needed to escape
+
+const WIN_COIN_COUNT = 5; // The coin count needed to win the game
+
+
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
 new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
 new KeyPressListener("ArrowLeft", () => handleArrowPress(-1, 0));
@@ -54,6 +61,71 @@ function checkForNpcInteraction(playerX, playerY) {
     }
   });
 }
+
+// Listen for changes in the game state
+firebase.database().ref('gameState').on('value', (snapshot) => {
+  const state = snapshot.val();
+  if (state && state.gameEnded) {
+    showWinPopup(state.winnerId);
+  }
+});
+
+function showWinPopup(winningPlayerId) {
+  const isLocalPlayerWinner = playerId === winningPlayerId;
+  const winningPlayerName = players[winningPlayerId].name;
+  const localPlayerName = players[playerId].name;  // This assumes `playerId` is the current player's ID
+  
+  // Choose the correct name to display based on whether the local player is the winner
+  const displayedName = isLocalPlayerWinner ? winningPlayerName : localPlayerName;
+  
+  const statusMessage = isLocalPlayerWinner ? "🏆 Winner! 🏆" : "Better luck next time";
+  const titleText = isLocalPlayerWinner ? "Congratulations!" : "Game Over!";
+  
+  const sortedPlayers = Object.values(players).sort((a, b) => b.coins - a.coins);
+  
+  let leaderboardHTML = '<ol class="leaderboard">';
+  sortedPlayers.forEach((player, index) => {
+    const itemClass = player.id === winningPlayerId ? 'winner' : 'loser';
+    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${player.name} - ${player.coins} ${player.readyToPlayAgain ? '✅' : ''}</li>`;
+  });
+  leaderboardHTML += '</ol>';
+
+  const winPopup = document.createElement('div');
+  winPopup.className = 'win-popup';
+  winPopup.innerHTML = `
+    <h2 class="win-title">${titleText}</h2>
+    <p class="status-message ${isLocalPlayerWinner ? 'winner' : 'loser'}">${statusMessage} ${displayedName} </p>
+    <h3>Leaderboard</h3>
+    ${leaderboardHTML}
+  `;
+ 
+
+  const existingPopup = document.querySelector('.win-popup');
+  if (existingPopup) {
+    gameContainer.removeChild(existingPopup);
+  }
+  gameContainer.appendChild(winPopup);
+}
+
+
+
+
+export function checkWinCondition(playerId) {
+  const player = players[playerId];
+  if (player.coins >= WIN_COIN_COUNT) {
+    player.hasWon = true;
+    // Update the player's win state in Firebase
+    playerRef.update({ hasWon: true });
+    // Update the game state in Firebase
+    firebase.database().ref('gameState').set({
+      gameEnded: true,
+      winnerId: playerId
+    });
+  }
+}
+
+
+
 
 allPlayersRef.on("value", (snapshot) => {
   // Fires whenever a change occurs
@@ -160,43 +232,89 @@ function updateAnimationState() {
   }
 }
 
-document.addEventListener("keydown", function (event) {
-  let keyHandled = false;
-  if (event.key === "ArrowUp") {
-    movementFlags.up = true;
-    keyHandled = true;
-  } else if (event.key === "ArrowDown") {
-    movementFlags.down = true;
-    keyHandled = true;
-  } else if (event.key === "ArrowLeft") {
-    movementFlags.left = true;
-    keyHandled = true;
-  } else if (event.key === "ArrowRight") {
-    movementFlags.right = true;
-    keyHandled = true;
-  } else if (event.key === "k") {
-    // Detect space bar
-    performKick();
-    playerRef.update({
-      animationState: "kick", // Update the player's animation state to "kick"
-    });
 
-    event.preventDefault(); // Prevent the default space bar action (e.g., page scrolling)
-    return; // Skip the movementFlags check and update
-  } else if (event.key === "p") {
-    if (!carryingPlayerId) {
-      attemptToPickUpPlayer();
+document.addEventListener("keydown", function (event) {
+  // Handle movement keys
+  let keyHandled = false;
+  if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    handleMovement(event.key); // Assuming you refactor movement handling into this function
+    keyHandled = true;
+  }
+
+  if (event.key === "e" || event.key === "E") {
+    if (players[playerId].isCarried) {
+      escapeKeyPressCount++;
+      console.log(`Escape attempt ${escapeKeyPressCount}/5 for player ${playerId}`);
+
+      if (escapeKeyPressCount >= ESCAPE_KEY_PRESS_LIMIT) {
+        putDownPlayer(playerId);  // Assuming the current player's ID is the carried player
+        escapeKeyPressCount = 0;  // Reset the count after escaping
+      }
+      event.preventDefault();
     }
-    event.preventDefault(); // Prevent default action
+  }
+
+  // Additional key handling
+  if (event.key === "k") {
+    // Example: handle 'k' for kick
+    handleKick();
+    keyHandled = true;
+  } else if (event.key === "p") {
+    // Example: handle 'p' for pick up
+    attemptToPickUpPlayer();
+    event.preventDefault();
   } else if (event.key === "t") {
+    // Example: handle 't' for throw
     attemptToThrowPlayer();
+    event.preventDefault();
   }
 
   if (keyHandled) {
-    event.preventDefault(); // Prevent default action (e.g., scrolling the page)
-    updateAnimationState(); // Update the animation state based on the current movement
+    event.preventDefault(); // General prevent default if any key was handled
+    updateAnimationState();
   }
 });
+
+function putDownPlayer(carriedPlayerId) {
+  if (carriedPlayerId && players[carriedPlayerId].isCarried) {
+    // Resetting the player to a state of not being carried
+    firebase.database().ref(`players/${carriedPlayerId}`).update({
+      isCarried: false,
+      isVisible: true,
+      animationState: "idle",  // Reset the carried player to 'idle' or another appropriate state
+      escapeKeyPressCount: 0   // Reset the escape key press count
+    });
+
+    // Also update the carrier's animation state
+    if (carryingPlayerId) {
+      firebase.database().ref(`players/${carryingPlayerId}`).update({
+        animationState: "idle"  // Reset the carrier to 'idle'
+      });
+    }
+
+    carryingPlayerId = null;  // Clear the carryingPlayerId
+    console.log(`Player ${carriedPlayerId} has been put down.`);
+    broadcastAnimationStateReset();
+  }
+}
+
+// Additional function to reset the animation state of all players
+function broadcastAnimationStateReset() {
+  Object.keys(players).forEach(playerKey => {
+    firebase.database().ref(`players/${playerKey}`).update({
+      animationState: "idle"
+    });
+  });
+}
+
+
+// You would need to ensure other player state updates like 'isCarried' are properly managed elsewhere in your code.
+
+
+
+
+
+
 
 document.addEventListener("keyup", function (event) {
   if (event.key === "ArrowUp") movementFlags.up = false;
@@ -238,6 +356,7 @@ function performKick() {
             x: bumpedBackX,
             y: bumpedBackY,
             animationState: "hit", // Set the animation state to "hit"
+            coins: Math.max(players[id].coins - 1, 0),
           });
           console.log(
             `Player ${id} was kicked and moved to (${bumpedBackX}, ${bumpedBackY}).`
@@ -293,6 +412,7 @@ function attemptToPickUpPlayer() {
   });
 }
 
+
 const throwDistance = 2; // Tiles the player can be thrown
 
 function attemptToThrowPlayer() {
@@ -300,6 +420,7 @@ function attemptToThrowPlayer() {
     const direction = players[playerId].direction;
     let newX = players[playerId].x;
     let newY = players[playerId].y;
+    escapeKeyPressCount = 0;
 
     // Adjust newX and newY based on the direction
     switch (direction) {
@@ -361,6 +482,9 @@ playerNameInput.addEventListener("change", (e) => {
     name: newName,
   });
 });
+
+
+
 
 //Update player color on button click
 playerColorButton.addEventListener("click", () => {
