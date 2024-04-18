@@ -97,6 +97,13 @@ function updateNpcElement(npc) {
   if (npc.order) {
     showOrder(npcElement, npc.order);
   }
+  if (npc.direction === "sitting") {
+    npcElement.setAttribute("data-facing", npc.facing);
+    npcElement.className += " " + npc.facing;
+  }
+  if (npc.npcLeaving) {
+    clearOrder(npc);
+  }
 }
 
 function getNextNpcId(callback) {
@@ -186,7 +193,7 @@ function makeMove(npc) {
       }
       npc.direction = "sitting";
       npc.targetChair.occupied = true;
-
+      updateNPCPosition(npc);
       const chairIndex = chairPositions.findIndex((chair) => {
         return chair.x === npc.targetChair.x && chair.y === npc.targetChair.y;
       });
@@ -212,7 +219,6 @@ function updateNPCPosition(npc) {
     direction: npc.direction,
     color: npc.color,
   });
-  updateNpcElement(npc);
 
   const npcElement = npcsElements[npc.id];
   if (npcElement) {
@@ -228,11 +234,19 @@ function updateNPCPosition(npc) {
         "up",
         "down"
       );
+      npcRef.update({
+        x: npc.x,
+        y: npc.y,
+        direction: npc.direction,
+        color: npc.color,
+        facing: npc.facing,
+      });
       npcElement.classList.add("sitting");
     } else {
       npcElement.classList.remove("sitting");
     }
   }
+  updateNpcElement(npc);
 }
 
 export function interactWithNpc(npcKey, npc) {
