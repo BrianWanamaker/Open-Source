@@ -22,10 +22,9 @@ export let carryingPlayerId = null; // Add this near your other global variable 
 
 // Add this near your other global variable declarations
 let escapeKeyPressCount = 0;
-const ESCAPE_KEY_PRESS_LIMIT = 5;  // Number of key presses needed to escape
+const ESCAPE_KEY_PRESS_LIMIT = 5; // Number of key presses needed to escape
 
 const WIN_COIN_COUNT = 75; // The coin count needed to win the game
-
 
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
 new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
@@ -62,62 +61,65 @@ function checkForNpcInteraction(playerX, playerY) {
   });
 }
 
-
-
 function showWinPopup(winningPlayerId) {
   const isLocalPlayerWinner = playerId === winningPlayerId;
   const winningPlayerName = players[winningPlayerId].name;
-  const localPlayerName = players[playerId].name;  // This assumes `playerId` is the current player's ID
-  
+  const localPlayerName = players[playerId].name; // This assumes `playerId` is the current player's ID
+
   // Choose the correct name to display based on whether the local player is the winner
-  const displayedName = isLocalPlayerWinner ? winningPlayerName : localPlayerName;
-  
-  const statusMessage = isLocalPlayerWinner ? "🏆 Winner! 🏆" : "Better luck next time";
+  const displayedName = isLocalPlayerWinner
+    ? winningPlayerName
+    : localPlayerName;
+
+  const statusMessage = isLocalPlayerWinner
+    ? "🏆 Winner! 🏆"
+    : "Better luck next time";
   const titleText = isLocalPlayerWinner ? "Congratulations!" : "Game Over!";
-  
-  const sortedPlayers = Object.values(players).sort((a, b) => b.coins - a.coins);
-  
+
+  const sortedPlayers = Object.values(players).sort(
+    (a, b) => b.coins - a.coins
+  );
+
   let leaderboardHTML = '<ol class="leaderboard">';
   sortedPlayers.forEach((player, index) => {
-    const itemClass = player.id === winningPlayerId ? 'winner' : 'loser';
-    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${player.name} - ${player.coins} ${player.readyToPlayAgain ? '✅' : ''}</li>`;
+    const itemClass = player.id === winningPlayerId ? "winner" : "loser";
+    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${
+      player.name
+    } - ${player.coins} ${player.readyToPlayAgain ? "✅" : ""}</li>`;
   });
-  leaderboardHTML += '</ol>';
+  leaderboardHTML += "</ol>";
 
-  const winPopup = document.createElement('div');
-  winPopup.className = 'win-popup';
+  const winPopup = document.createElement("div");
+  winPopup.className = "win-popup";
   winPopup.innerHTML = `
     <h2 class="win-title">${titleText}</h2>
-    <p class="status-message ${isLocalPlayerWinner ? 'winner' : 'loser'}">${statusMessage} ${displayedName} </p>
+    <p class="status-message ${
+      isLocalPlayerWinner ? "winner" : "loser"
+    }">${statusMessage} ${displayedName} </p>
     <h3>Leaderboard</h3>
     ${leaderboardHTML}
   `;
- 
 
-  const existingPopup = document.querySelector('.win-popup');
+  const existingPopup = document.querySelector(".win-popup");
   if (existingPopup) {
     gameContainer.removeChild(existingPopup);
   }
   gameContainer.appendChild(winPopup);
 }
 
-
 export function checkWinCondition(playerId) {
   const player = players[playerId];
   if (player.coins >= WIN_COIN_COUNT) {
     // The player has won
     console.log(`Player ${playerId} wins with ${player.coins} coins.`);
-    firebase.database().ref('gameState').set({
+    firebase.database().ref("gameState").set({
       gameEnded: true,
-      winnerId: playerId
+      winnerId: playerId,
     });
   }
 }
 
-
-
 allPlayersRef.on("value", (snapshot) => {
-
   players = snapshot.val() || {};
   Object.keys(players).forEach((key) => {
     const characterState = players[key];
@@ -221,7 +223,6 @@ function updateAnimationState() {
   }
 }
 
-
 document.addEventListener("keydown", function (event) {
   console.log("Key pressed:", event.key); // Debug key presses
 
@@ -267,20 +268,17 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-
-
-firebase.database().ref('gameState').on('value', (snapshot) => {
-  const state = snapshot.val();
-  console.log("Current game state:", state);  // Log the current game state to debug
-  if (state && state.gameEnded) {
-    console.log("Game has ended, showing win popup.");
-    showWinPopup(state.winnerId);
-  }
-});
-
-
-
-
+firebase
+  .database()
+  .ref("gameState")
+  .on("value", (snapshot) => {
+    const state = snapshot.val();
+    console.log("Current game state:", state); // Log the current game state to debug
+    if (state && state.gameEnded) {
+      console.log("Game has ended, showing win popup.");
+      showWinPopup(state.winnerId);
+    }
+  });
 
 document.addEventListener("keyup", function (event) {
   if (event.key === "ArrowUp") movementFlags.up = false;
@@ -318,12 +316,15 @@ function performKick() {
         ) {
           // Move the player as far as possible before hitting the obstacle
           // Update the bumped player's position and animation state to "hit" in Firebase
-          firebase.database().ref(`players/${id}`).update({
-            x: bumpedBackX,
-            y: bumpedBackY,
-            animationState: "hit", // Set the animation state to "hit"
-            coins: Math.max(players[id].coins - 1, 0),
-          });
+          firebase
+            .database()
+            .ref(`players/${id}`)
+            .update({
+              x: bumpedBackX,
+              y: bumpedBackY,
+              animationState: "hit", // Set the animation state to "hit"
+              coins: Math.max(players[id].coins - 1, 0),
+            });
           console.log(
             `Player ${id} was kicked and moved to (${bumpedBackX}, ${bumpedBackY}).`
           );
@@ -377,7 +378,6 @@ function attemptToPickUpPlayer() {
     }
   });
 }
-
 
 const throwDistance = 2; // Tiles the player can be thrown
 
@@ -449,9 +449,6 @@ playerNameInput.addEventListener("change", (e) => {
   });
 });
 
-
-
-
 //Update player color on button click
 playerColorButton.addEventListener("click", () => {
   const mySkinIndex = playerColors.indexOf(players[playerId].color);
@@ -462,9 +459,23 @@ playerColorButton.addEventListener("click", () => {
 });
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    //You're logged in!
+    // You're logged in!
     playerId = user.uid;
     playerRef = firebase.database().ref(`players/${playerId}`);
+
+    allPlayersRef.once("value", (snapshot) => {
+      if (
+        !snapshot.exists() ||
+        snapshot.numChildren() === 1 ||
+        snapshot.numChildren() === 0
+      ) {
+        const allNPCSRef = firebase.database().ref(`npcs`);
+        allNPCSRef.remove();
+        firebase.database().ref(`lastNpcId`).remove();
+        firebase.database().ref(`npcInitStatus`).remove();
+        firebase.database().ref(`chairs`).remove();
+      }
+    });
 
     const name = createName();
     playerNameInput.value = name;
@@ -483,13 +494,11 @@ firebase.auth().onAuthStateChanged((user) => {
       items: { coffee: false, pizza: false },
     });
 
-    //Remove me from Firebase when I diconnect
     playerRef.onDisconnect().remove();
 
-    //Begin the game now that we are signed in
     initGame();
   } else {
-    //You're logged out.
+    // You're logged out.
   }
 });
 
@@ -501,3 +510,6 @@ firebase
     var errorMessage = error.message;
     console.log(errorCode, errorMessage);
   });
+// const allNPCSRef = firebase.database().ref(`npcs`);
+// playerRef.onDisconnect().remove();
+// allNPCSRef.onDisconnect().remove();
