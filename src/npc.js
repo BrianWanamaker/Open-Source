@@ -23,8 +23,9 @@ const chairPositions = [
   { x: 4, y: 7, occupied: false },
   { x: 7, y: 9, occupied: false },
 ];
-initializeNPCs();
-function initializeNPCs() {
+
+export function initializeNPCs() {
+  console.log("initalizing npcs..");
   const npcInitRef = firebase.database().ref("npcInitStatus");
   npcInitRef.transaction(
     (current) => {
@@ -246,7 +247,6 @@ export function interactWithNpc(npcKey, npc) {
         playerLosesPizza();
       }
       playerScoresPoints(10);
-
 
       npc.order = null;
       clearOrder(npc);

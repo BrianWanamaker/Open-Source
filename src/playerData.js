@@ -1,7 +1,7 @@
 import { attemptGrabPizza, attemptGrabCoffee } from "./items.js";
 import { attemptGrabCoin } from "./coins.js";
 import { mapData, isSolid } from "./misc.js";
-import { npcs, interactWithNpc } from "./npc.js";
+import { npcs, interactWithNpc, initializeNPCs } from "./npc.js";
 import {
   gameContainer,
   playerNameInput,
@@ -469,11 +469,15 @@ firebase.auth().onAuthStateChanged((user) => {
         snapshot.numChildren() === 1 ||
         snapshot.numChildren() === 0
       ) {
-        const allNPCSRef = firebase.database().ref(`npcs`);
-        allNPCSRef.remove();
-        firebase.database().ref(`lastNpcId`).remove();
-        firebase.database().ref(`npcInitStatus`).remove();
-        firebase.database().ref(`chairs`).remove();
+        console.log("Setting to null");
+        const updates = {
+          "/npcs": null,
+          "/lastNpcId": null,
+          "/npcInitStatus": null,
+          "/chairs": null,
+        };
+        firebase.database().ref().update(updates);
+        initializeNPCs();
       }
     });
 
