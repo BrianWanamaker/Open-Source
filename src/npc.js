@@ -58,7 +58,7 @@ export function initializeNPCs() {
 }
 
 function createNpcWithDelay(index) {
-  if (index < 4) {
+  if (index < 9) {
     getNextNpcId((id) => {
       npcs[id] = {
         id,
