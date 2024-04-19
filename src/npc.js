@@ -135,6 +135,7 @@ function createNpcElement(npc) {
   if (npc.order) {
     showOrder(npcElement, npc.order);
   }
+  updateNpcElement(npc);
 }
 
 export function placeNPC(npc) {
