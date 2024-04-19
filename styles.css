@@ -293,6 +293,7 @@ button:active {
 
 .Character_shadow {
   background: url(/images/shadow.png) no-repeat no-repeat;
+  top: 4px;
 }
 
 .Character_name-container {
