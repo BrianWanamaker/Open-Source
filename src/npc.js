@@ -15,7 +15,6 @@ let direction = "right";
 let startPosition = { x: 2, y: 11 };
 let { x, y } = startPosition;
 let npcColor = randomFromArray(npcColors);
-let npcLeaving = false;
 let lastNpcId = 0;
 const chairPositions = [
   { x: 10, y: 6, occupied: false },
