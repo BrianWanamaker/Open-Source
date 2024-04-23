@@ -515,6 +515,21 @@ firebase
     var errorMessage = error.message;
     console.log(errorCode, errorMessage);
   });
-// const allNPCSRef = firebase.database().ref(`npcs`);
-// playerRef.onDisconnect().remove();
-// allNPCSRef.onDisconnect().remove();
+function updateLiveScoreboard() {
+  const scoreboardElement = document.getElementById("live-scoreboard");
+  scoreboardElement.innerHTML = "";
+  const sortedPlayers = Object.values(players).sort(
+    (a, b) => b.coins - a.coins
+  );
+
+  sortedPlayers.forEach((player) => {
+    const playerItem = document.createElement("li");
+    playerItem.textContent = `${player.name}: ${player.coins} coins`;
+    scoreboardElement.appendChild(playerItem);
+  });
+}
+
+allPlayersRef.on("value", (snapshot) => {
+  players = snapshot.val() || {};
+  updateLiveScoreboard();
+});
