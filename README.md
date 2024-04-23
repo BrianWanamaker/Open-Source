@@ -18,11 +18,12 @@ This is a competitive multiplayer, grid-based adventure game where players race 
 Ensure you have the following installed:
 
 - [Node.js](https://nodejs.org/)
-- A modern web browser.
+- Google Chrome or Mozilla Firefox
+- Git 
 
 ### Installation
 
-1. Navigate to where you want to store the game:
+1. Navigate to where you want to store the game in a terminal:
    ```sh
    cd <MyPath/File>
    ```
@@ -39,53 +40,52 @@ Ensure you have the following installed:
    Build -> Realtime Database -> Create Database
    ```
 5. Set up Firebase Rules
-```sh
-Realtime Database -> Rules
-Example of FireBase Rules:
-```
-```json
-{
-  "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null",
-    "players": {
-      "$uid": {
-        ".write": "$uid === auth.uid",
-        "itemsHeld": {
-          "$item": {
-            ".validate": "newData.isBoolean()"
-          }
-        }
-      }
-    },
-    "gameState": {
-      "items": {
-        "$item_id": {
-          ".write": "(!data.child('available').exists() || data.child('available').val() === true) && newData.child('available').val() === false"
-        }
-      }
-    },
-    "coins": {
-      ".write": "auth != null"
-    },
-    "npcs": {
-      ".write": "auth != null"
-    },
-    "chatMessages": {
-      ".indexOn": ["timestamp"],
-      ".write": "auth != null"
-    },
-    "activePlayersCount": {
-      ".validate": "newData.isNumber()"
-    }
-  }
-}
-```
-4. Create .env in root folder and paste firebaseConfig from FireBase
+   ```sh
+   Realtime Database -> Rules
+   Example of FireBase Rules:
+   ```
+   ```json
+   {
+     "rules": {
+       ".read": "auth != null",
+       ".write": "auth != null",
+       "players": {
+         "$uid": {
+           ".write": "$uid === auth.uid",
+           "itemsHeld": {
+             "$item": {
+               ".validate": "newData.isBoolean()"
+             }
+           }
+         }
+       },
+       "gameState": {
+         "items": {
+           "$item_id": {
+             ".write": "(!data.child('available').exists() || data.child('available').val() === true) && newData.child('available').val() === false"
+           }
+         }
+       },
+       "coins": {
+         ".write": "auth != null"
+       },
+       "npcs": {
+         ".write": "auth != null"
+       },
+       "chatMessages": {
+         ".indexOn": ["timestamp"],
+         ".write": "auth != null"
+       },
+       "activePlayersCount": {
+         ".validate": "newData.isNumber()"
+       }
+     }
+   }
+   ```
+6. Create .env in root folder and paste `SDK setup and configuration` from FireBase Project Settings
    ```sh
    Example .env file:
    ```
-
    ```txt
    apiKey: "exampleAPIKey"
    authDomain: "example.firebaseapp.com",
@@ -95,21 +95,21 @@ Example of FireBase Rules:
    messagingSenderId: "1234567",
    appId: "1:2345678",
    measurementId: "E-123456"
-  ``
-6. Install HTTP-Server
-   ```sh
-   https://github.com/http-party/http-server
-   npm install http-server or brew install http-server
    ```
-7. Build the config file:
+7. Install HTTP-Server
+   ```sh
+   [run npm install http-server or brew install http-server in terminal ](https://github.com/http-party/http-server)
+   ```
+8. Build the config file:
    ```sh
    node build.js
    ```
-8. Start the game:
+9. Start the game:
    ```sh
-   http-server
+   http-server in terminal
    ```
-The game will now be running on `http://localhost:8080/`.
+The game will now be running on `http://localhost:8080/`. 
+
 ## Gameplay
 
 - Navigate the grid with arrow keys, avoiding blocked spaces and strategizing your movements.
