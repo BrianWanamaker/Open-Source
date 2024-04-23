@@ -97,14 +97,20 @@ Ensure you have the following installed:
    measurementId: "E-123456"
    ```
 7. Install HTTP-Server
-   ```sh
-   [run npm install http-server or brew install http-server in terminal ](https://github.com/http-party/http-server)
+    - To install using npm (Node.js must be installed), run:
    ```
-8. Build the config file:
+     npm install http-server
+   ```
+   - Alternatively, you can install it via Homebrew on macOS:
+   ```
+     brew install http-server
+   ```
+   - [http-server documentation](https://github.com/http-party/http-server)
+8. Build the config file in terminal:
    ```sh
    node build.js
    ```
-9. Start the game:
+9. Start the game in terminal:
    ```sh
    http-server in terminal
    ```
