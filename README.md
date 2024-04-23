@@ -82,7 +82,11 @@ Ensure you have the following installed:
      }
    }
    ```
-6. Create .env in root folder and paste `SDK setup and configuration` from FireBase Project Settings
+6. Set up Anonymous Authentication in FireBase
+   ```txt
+    Build -> Authentication -> Start Authentication -> Enable Anonymous Authentication
+   ```
+7. Create .env in root folder and paste `SDK setup and configuration` from FireBase Project Settings
    ```sh
    Example .env file:
    ```
@@ -96,7 +100,7 @@ Ensure you have the following installed:
    appId: "1:2345678",
    measurementId: "E-123456"
    ```
-7. Install HTTP-Server
+8. Install HTTP-Server
     - To install using npm (Node.js must be installed), run:
    ```
      npm install http-server
@@ -106,11 +110,11 @@ Ensure you have the following installed:
      brew install http-server
    ```
    - [http-server documentation](https://github.com/http-party/http-server)
-8. Build the config file in terminal:
+9. Build the config file in terminal:
    ```sh
    node build.js
    ```
-9. Start the game in terminal:
+10. Start the game in terminal:
    ```txt
    http-server
    ```
