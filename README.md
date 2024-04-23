@@ -36,8 +36,10 @@ Ensure you have the following installed:
    ```sh
    https://firebase.google.com/
    ```
-4. Create .env and paste firebaseConfig from firebase
+4. Create .env in root folder and paste firebaseConfig from firebase
    ```sh
+   Example .env file:
+   
    apiKey: "exampleAPIKey"
    authDomain: "example.firebaseapp.com",
    databaseURL: "https://example.firebaseio.com",
