@@ -475,6 +475,7 @@ firebase.auth().onAuthStateChanged((user) => {
           "/lastNpcId": null,
           "/npcInitStatus": null,
           "/chairs": null,
+          "/coins": null,
         };
         firebase.database().ref().update(updates);
         initializeNPCs();
