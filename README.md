@@ -22,29 +22,41 @@ Ensure you have the following installed:
 
 ### Installation
 
-1. Clone the repository:
+1. Navigate to where you want to store the game:
+   ```sh
+   cd <MyPath/File>
+   ```
+
+2. Clone the repository:
    ```sh
    git clone https://github.com/BrianWanamaker/Open-Source.git
    ```
-2. Navigate to the game directory:
-   ```sh
-   cd ...
-   ```
+
 3. Create Firebase database
    ```sh
    https://firebase.google.com/
    ```
-4. Create .env and paste firebaseConfig
+4. Create .env and paste firebaseConfig from firebase
+   ```sh
+   apiKey: "exampleAPIKey"
+   authDomain: "example.firebaseapp.com",
+   databaseURL: "https://example.firebaseio.com",
+   projectId: "open-source-example-",
+   storageBucket: "open-source-example.com",
+   messagingSenderId: "1234567",
+   appId: "1:2345678",
+   measurementId: "E-123456"
+  ``
 
-5. Install HTTP-Server
+6. Install HTTP-Server
    ```sh
    https://github.com/http-party/http-server
    ```
-6. Build the config file:
+7. Build the config file:
    ```sh
    node build.js
    ```
-7. Start the game:
+8. Start the game:
    ```sh
    Http-Server
    ```
