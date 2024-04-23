@@ -26,20 +26,67 @@ Ensure you have the following installed:
    ```sh
    cd <MyPath/File>
    ```
-
 2. Clone the repository:
    ```sh
    git clone https://github.com/BrianWanamaker/Open-Source.git
    ```
-
-3. Create Firebase database
+3. Create a Firebase database
    ```sh
-   https://firebase.google.com/
+   Open a Web Browser and create a FireBase Database at https://firebase.google.com/
    ```
-4. Create .env in root folder and paste firebaseConfig from firebase
+4. Set up a Realtime Database
+    ```sh
+   Build -> Realtime Database -> Create Database
+   ```
+5. Set up Firebase Rules
+```sh
+Realtime Database -> Rules
+Example of FireBase Rules:
+```
+```json
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "players": {
+      "$uid": {
+        ".write": "$uid === auth.uid",
+        "itemsHeld": {
+          "$item": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    },
+    "gameState": {
+      "items": {
+        "$item_id": {
+          ".write": "(!data.child('available').exists() || data.child('available').val() === true) && newData.child('available').val() === false"
+        }
+      }
+    },
+    "coins": {
+      ".write": "auth != null"
+    },
+    "npcs": {
+      ".write": "auth != null"
+    },
+    "chatMessages": {
+      ".indexOn": ["timestamp"],
+      ".write": "auth != null"
+    },
+    "activePlayersCount": {
+      ".validate": "newData.isNumber()"
+    }
+  }
+}
+```
+4. Create .env in root folder and paste firebaseConfig from FireBase
    ```sh
    Example .env file:
-   
+   ```
+
+   ```txt
    apiKey: "exampleAPIKey"
    authDomain: "example.firebaseapp.com",
    databaseURL: "https://example.firebaseio.com",
@@ -49,10 +96,10 @@ Ensure you have the following installed:
    appId: "1:2345678",
    measurementId: "E-123456"
   ``
-
 6. Install HTTP-Server
    ```sh
    https://github.com/http-party/http-server
+   npm install http-server or brew install http-server
    ```
 7. Build the config file:
    ```sh
@@ -60,11 +107,9 @@ Ensure you have the following installed:
    ```
 8. Start the game:
    ```sh
-   Http-Server
+   http-server
    ```
-
 The game will now be running on `http://localhost:8080/`.
-
 ## Gameplay
 
 - Navigate the grid with arrow keys, avoiding blocked spaces and strategizing your movements.
