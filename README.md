@@ -18,38 +18,97 @@ This is a competitive multiplayer, grid-based adventure game where players race 
 Ensure you have the following installed:
 
 - [Node.js](https://nodejs.org/)
-- A modern web browser.
+- Google Chrome or Mozilla Firefox
+- Git 
 
 ### Installation
 
-1. Clone the repository:
+1. Navigate to where you want to store the game in a terminal:
+   ```sh
+   cd <MyPath/File>
+   ```
+2. Clone the repository:
    ```sh
    git clone https://github.com/BrianWanamaker/Open-Source.git
    ```
-2. Navigate to the game directory:
+3. Create a Firebase database
    ```sh
-   cd ...
+   Open a Web Browser and create a FireBase Database at https://firebase.google.com/
    ```
-3. Create Firebase database
+4. Set up a Realtime Database
+    ```sh
+   Build -> Realtime Database -> Create Database
+   ```
+5. Set up Firebase Rules
    ```sh
-   https://firebase.google.com/
+   Realtime Database -> Rules
+   Example of FireBase Rules:
    ```
-4. Create .env and paste firebaseConfig
-
-5. Install HTTP-Server
+   ```json
+   {
+     "rules": {
+       ".read": "auth != null",
+       ".write": "auth != null",
+       "players": {
+         "$uid": {
+           ".write": "$uid === auth.uid",
+           "itemsHeld": {
+             "$item": {
+               ".validate": "newData.isBoolean()"
+             }
+           }
+         }
+       },
+       "gameState": {
+         "items": {
+           "$item_id": {
+             ".write": "(!data.child('available').exists() || data.child('available').val() === true) && newData.child('available').val() === false"
+           }
+         }
+       },
+       "coins": {
+         ".write": "auth != null"
+       },
+       "npcs": {
+         ".write": "auth != null"
+       },
+       "chatMessages": {
+         ".indexOn": ["timestamp"],
+         ".write": "auth != null"
+       },
+       "activePlayersCount": {
+         ".validate": "newData.isNumber()"
+       }
+     }
+   }
+   ```
+6. Create .env in root folder and paste `SDK setup and configuration` from FireBase Project Settings
    ```sh
-   https://github.com/http-party/http-server
+   Example .env file:
    ```
-6. Build the config file:
+   ```txt
+   apiKey: "exampleAPIKey"
+   authDomain: "example.firebaseapp.com",
+   databaseURL: "https://example.firebaseio.com",
+   projectId: "open-source-example-",
+   storageBucket: "open-source-example.com",
+   messagingSenderId: "1234567",
+   appId: "1:2345678",
+   measurementId: "E-123456"
+   ```
+7. Install HTTP-Server
+   ```sh
+   [run npm install http-server or brew install http-server in terminal ](https://github.com/http-party/http-server)
+   ```
+8. Build the config file:
    ```sh
    node build.js
    ```
-7. Start the game:
+9. Start the game:
    ```sh
-   Http-Server
+   http-server in terminal
    ```
-
-The game will now be running on `http://localhost:8080/`.
+The game will now be running on `http://localhost:8080/`. 
 
 ## Gameplay
 
