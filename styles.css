@@ -670,5 +670,25 @@ button:hover {
 }
 
 .leaderboard li .play-icon {
-  font-size: 16px; /* Size of the icon */
+  font-size: 16px;
+}
+
+.scoreboard-container {
+  position: fixed;
+  top: 90px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px;
+  border-radius: 8px;
+  width: 200px;
+}
+
+.scoreboard-container h3 {
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.scoreboard-container ol {
+  padding-left: 20px;
 }
