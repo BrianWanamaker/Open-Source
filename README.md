@@ -115,9 +115,9 @@ Ensure you have the following installed:
    node build.js
    ```
 10. Start the game in terminal:
-   ```txt
-   http-server
-   ```
+    ```txt
+    http-server
+    ```
 The game will now be running on `http://localhost:8080/`. 
 
 ## Gameplay
