@@ -22,7 +22,7 @@ export let carryingPlayerId = null; // Add this near your other global variable 
 
 // Add this near your other global variable declarations
 let escapeKeyPressCount = 0;
-const ESCAPE_KEY_PRESS_LIMIT = 5; // Number of key presses needed to escape
+const ESCAPE_KEY_PRESS_LIMIT = 1; // Number of key presses needed to escape
 
 const WIN_COIN_COUNT = 75; // The coin count needed to win the game
 
@@ -224,7 +224,7 @@ function updateAnimationState() {
 }
 
 document.addEventListener("keydown", function (event) {
-  console.log("Key pressed:", event.key); // Debug key presses
+  console.log("Key pressed:", event.key); // Confirm this logs
 
   let keyHandled = false;
 
@@ -254,19 +254,22 @@ document.addEventListener("keydown", function (event) {
     attemptToThrowPlayer();
     keyHandled = true;
   } else if (event.key === "e" && players[playerId].isCarried) {
-    console.log(`Escape attempt by player ${playerId}`);
+    console.log("Escape attempt detected"); // Check if this logs
     escapeKeyPressCount++;
+    console.log("Escape key press count:", escapeKeyPressCount); // Debug the count
     if (escapeKeyPressCount >= ESCAPE_KEY_PRESS_LIMIT) {
+      console.log("Attempting to escape"); // Check if this gets logged
       escapePlayer();
     }
     keyHandled = true;
   }
 
   if (keyHandled) {
-    event.preventDefault();
+    event.preventDefault(); // To ensure it captures 'e' properly
     updateAnimationState();
   }
 });
+
 
 firebase
   .database()
@@ -378,6 +381,56 @@ function attemptToPickUpPlayer() {
     }
   });
 }
+
+function escapePlayer() {
+  console.log("Current Player ID:", playerId);
+  console.log("Carrying Player ID:", carryingPlayerId);
+  console.log("Is Carried Status:", players[playerId].isCarried);
+
+  // Ensure the player is carried and the carryingPlayerId is valid
+  if (players[playerId].isCarried && carryingPlayerId) {
+    console.log("Escape attempt initiated by player being carried");
+
+    // Reset escape key press count
+    escapeKeyPressCount = 0;
+
+    // Update the player's state to not carried
+    firebase.database().ref(`players/${playerId}`).update({
+      isCarried: false,
+      isVisible: true, // This should make the player visible again
+      animationState: 'idle'
+    });
+
+    // Clear the carrying status from the carrier
+    firebase.database().ref(`players/${carryingPlayerId}`).update({
+      isCarrying: false,  // Ensure this attribute is managed correctly
+      animationState: 'idle'
+    });
+    carryingPlayerId = null;
+
+    // Optionally move the player to a nearby spot if needed
+    let nearbyX = players[playerId].x + 1;
+    let nearbyY = players[playerId].y;
+    if (!isSolid(nearbyX, nearbyY) && withinBoundaries(nearbyX, nearbyY)) {
+      players[playerId].x = nearbyX;
+      players[playerId].y = nearbyY;
+      playerRef.set(players[playerId]);
+    }
+
+    console.log(`Player ${playerId} has successfully escaped from being carried.`);
+  } else {
+    console.log("No valid escape conditions met for player:", playerId);
+  }
+}
+
+
+
+
+
+
+
+
+
 
 const throwDistance = 2; // Tiles the player can be thrown
 
