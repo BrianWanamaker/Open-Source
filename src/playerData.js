@@ -22,7 +22,7 @@ export let carryingPlayerId = null; // Add this near your other global variable 
 
 // Add this near your other global variable declarations
 let escapeKeyPressCount = 0;
-const ESCAPE_KEY_PRESS_LIMIT = 1; // Number of key presses needed to escape
+const ESCAPE_KEY_PRESS_LIMIT = 10; // Number of key presses needed to escape
 
 const WIN_COIN_COUNT = 75; // The coin count needed to win the game
 
@@ -61,51 +61,117 @@ function checkForNpcInteraction(playerX, playerY) {
   });
 }
 
-function showWinPopup(winningPlayerId) {
-  const isLocalPlayerWinner = playerId === winningPlayerId;
-  const winningPlayerName = players[winningPlayerId].name;
-  const localPlayerName = players[playerId].name; // This assumes `playerId` is the current player's ID
+let countdownInterval = null;
 
-  // Choose the correct name to display based on whether the local player is the winner
-  const displayedName = isLocalPlayerWinner
-    ? winningPlayerName
-    : localPlayerName;
 
-  const statusMessage = isLocalPlayerWinner
-    ? "🏆 Winner! 🏆"
-    : "Better luck next time";
-  const titleText = isLocalPlayerWinner ? "Congratulations!" : "Game Over!";
 
-  const sortedPlayers = Object.values(players).sort(
-    (a, b) => b.coins - a.coins
-  );
-
-  let leaderboardHTML = '<ol class="leaderboard">';
-  sortedPlayers.forEach((player, index) => {
-    const itemClass = player.id === winningPlayerId ? "winner" : "loser";
-    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${
-      player.name
-    } - ${player.coins} ${player.readyToPlayAgain ? "✅" : ""}</li>`;
-  });
-  leaderboardHTML += "</ol>";
-
-  const winPopup = document.createElement("div");
-  winPopup.className = "win-popup";
-  winPopup.innerHTML = `
-    <h2 class="win-title">${titleText}</h2>
-    <p class="status-message ${
-      isLocalPlayerWinner ? "winner" : "loser"
-    }">${statusMessage} ${displayedName} </p>
-    <h3>Leaderboard</h3>
-    ${leaderboardHTML}
-  `;
-
+function showWinPopup(winningPlayerId, countdownSeconds = 10) {
+  // Clear any existing popup and intervals
   const existingPopup = document.querySelector(".win-popup");
   if (existingPopup) {
     gameContainer.removeChild(existingPopup);
   }
+  clearExistingInterval();
+
+  // Define player and game status
+  const isLocalPlayerWinner = playerId === winningPlayerId;
+  const winningPlayerName = players[winningPlayerId].name;
+  const localPlayerName = players[playerId].name;
+  const displayedName = isLocalPlayerWinner ? winningPlayerName : localPlayerName;
+  const statusMessage = isLocalPlayerWinner ? "🏆 Winner! 🏆" : "Better luck next time";
+  const titleText = isLocalPlayerWinner ? "Congratulations!" : "Game Over!";
+
+  // Construct the leaderboard HTML
+  const sortedPlayers = Object.values(players).sort((a, b) => b.coins - a.coins);
+  let leaderboardHTML = '<ol class="leaderboard">';
+  sortedPlayers.forEach((player, index) => {
+    const itemClass = player.id === winningPlayerId ? "winner" : "loser";
+    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${player.name} - ${player.coins} ${player.readyToPlayAgain ? "✅" : ""}</li>`;
+  });
+  leaderboardHTML += "</ol>";
+
+  // Create the win popup with dynamic countdown message
+  const winPopup = document.createElement("div");
+  winPopup.className = "win-popup";
+  winPopup.innerHTML = `
+    <h2 class="win-title">${titleText}</h2>
+    <p class="status-message ${isLocalPlayerWinner ? "winner" : "loser"}">${statusMessage} ${displayedName}</p>
+    <h3>Leaderboard</h3>
+    ${leaderboardHTML}
+    <p id="countdown" style="font-size: 20px; font-weight: bold; margin-top: 20px;">Restarting in ${countdownSeconds} seconds...</p>
+  `;
   gameContainer.appendChild(winPopup);
+
+  // Start dynamic countdown
+  let counter = countdownSeconds;
+  const countdownElement = winPopup.querySelector("#countdown");
+  countdownInterval = setInterval(() => {
+    counter--;
+    if (countdownElement) {
+      countdownElement.textContent = `Restarting in ${counter} seconds...`;
+    }
+
+    if (counter <= 0) {
+      clearInterval(countdownInterval);
+      countdownInterval = null; // Clear the interval variable after clearing it
+      resetGame();
+    }
+  }, 1000);
 }
+
+function clearExistingInterval() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+// ...keep the rest of the code as is
+
+
+
+function resetGame() {
+  // reset the game
+  console.log("Resetting the game...");
+  clearExistingInterval();
+  // rest player score
+  playerRef.update({
+    coins: 0,
+  });
+  // Reset all players' coins
+  allPlayersRef.once("value", (snapshot) => {
+    snapshot.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      firebase.database().ref(`players/${childKey}`).update({
+        coins: 0,
+        readyToPlayAgain: false,
+      });
+    });
+  });
+  //reset player location 
+  const { x, y } = getRandomSafeSpot();
+  playerRef.update({
+    x,
+    y,
+    readyToPlayAgain: true,
+  });
+
+
+  // Remove the win popup
+  const winPopup = document.querySelector(".win-popup");
+  if (winPopup) {
+    gameContainer.removeChild(winPopup);
+  }
+  // Start the game again
+  initGame();
+
+
+}
+
+
+
+
+
 
 export function checkWinCondition(playerId) {
   const player = players[playerId];
@@ -118,6 +184,9 @@ export function checkWinCondition(playerId) {
     });
   }
 }
+
+
+
 
 allPlayersRef.on("value", (snapshot) => {
   players = snapshot.val() || {};
@@ -205,10 +274,10 @@ function isMoving() {
   );
 }
 
-// Update the animation state based on movement
+// Update the animation state based on movement and carrying status
 function updateAnimationState() {
-  if (carryingPlayerId) {
-    // Player A is carrying Player B, so ensure the "pickedUp" animation state persists
+  if (carryingPlayerId && players[playerId].isCarrying) {
+    // Ensure that we only set "pickedUp" if the player is still carrying another player
     playerRef.update({
       animationState: "pickedUp",
     });
@@ -222,6 +291,7 @@ function updateAnimationState() {
     });
   }
 }
+
 
 document.addEventListener("keydown", function (event) {
   console.log("Key pressed:", event.key); // Confirm this logs
@@ -244,7 +314,6 @@ document.addEventListener("keydown", function (event) {
   } else if (event.key === "k") {
     performKick();
     playerRef.update({ animationState: "kick" });
-    keyHandled = true;
   } else if (event.key === "p") {
     if (!carryingPlayerId) {
       attemptToPickUpPlayer();
@@ -260,8 +329,9 @@ document.addEventListener("keydown", function (event) {
     if (escapeKeyPressCount >= ESCAPE_KEY_PRESS_LIMIT) {
       console.log("Attempting to escape"); // Check if this gets logged
       escapePlayer();
+      keyHandled = true;
     }
-    keyHandled = true;
+
   }
 
   if (keyHandled) {
@@ -301,6 +371,8 @@ function performKick() {
     players[playerId].y +
     (kickDirection === "up" ? -1 : kickDirection === "down" ? 1 : 0);
 
+
+
   Object.keys(players).forEach(function (id) {
     if (players[id].x === kickRangeX && players[id].y === kickRangeY) {
       // Attempt to bump the player back by 2 spaces, but check for obstacles
@@ -317,6 +389,7 @@ function performKick() {
           !isSolid(bumpedBackX, bumpedBackY) &&
           withinBoundaries(bumpedBackX, bumpedBackY)
         ) {
+
           // Move the player as far as possible before hitting the obstacle
           // Update the bumped player's position and animation state to "hit" in Firebase
           firebase
@@ -348,33 +421,29 @@ function performKick() {
 
 function attemptToPickUpPlayer() {
   Object.keys(players).forEach(function (id) {
-    if (id !== playerId && !carryingPlayerId) {
-      // Ensure Player A is not already carrying another player
+    if (id !== playerId && !carryingPlayerId && !players[id].isCarried) {
       const otherPlayer = players[id];
       const distanceX = Math.abs(players[playerId].x - otherPlayer.x);
       const distanceY = Math.abs(players[playerId].y - otherPlayer.y);
 
-      if (
-        (distanceX === 1 && distanceY === 0) ||
-        (distanceX === 0 && distanceY === 1)
-      ) {
-        carryingPlayerId = id;
+      console.log(`Trying to pick up: Checking conditions for ${id}`);
 
-        // Update Player A's animation state to "pickingUp"
-        if (id === carryingPlayerId) {
-          firebase.database().ref(`players/${playerId}`).update({
-            animationState: "pickedUp",
-          });
-        }
+      if ((distanceX === 1 && distanceY === 0) || (distanceX === 0 && distanceY === 1)) {
+        carryingPlayerId = id; // Mark the carrying player ID
+        players[playerId].isCarrying = true;
+        players[id].isCarried = true;
+        players[id].carriedBy = playerId; // This is the reciprocal link
 
-        // Temporarily hide Player B
-        firebase.database().ref(`players/${id}`).update({
-          isCarried: true,
-          isVisible: false, // Add this line
+        firebase.database().ref(`players/${playerId}`).update({
+          isCarrying: true,
+          carryingPlayerId: id
         });
 
-        // Hide Player B's character element
-        playerElements[id].style.display = "none";
+        firebase.database().ref(`players/${id}`).update({
+          isCarried: true,
+          carriedBy: playerId,
+          isVisible: false
+        });
 
         console.log(`Player ${playerId} is now carrying player ${id}.`);
       }
@@ -383,30 +452,29 @@ function attemptToPickUpPlayer() {
 }
 
 function escapePlayer() {
-  console.log("Current Player ID:", playerId);
-  console.log("Carrying Player ID:", carryingPlayerId);
-  console.log("Is Carried Status:", players[playerId].isCarried);
+  if (players[playerId].isCarried && players[playerId].carriedBy) {
+    let carrierId = players[playerId].carriedBy;
 
-  // Ensure the player is carried and the carryingPlayerId is valid
-  if (players[playerId].isCarried && carryingPlayerId) {
-    console.log("Escape attempt initiated by player being carried");
+    console.log(`Escape initiated by ${playerId} who is carried by ${carrierId}`);
 
     // Reset escape key press count
     escapeKeyPressCount = 0;
 
-    // Update the player's state to not carried
+    // Clear carried status on both the carried and the carrier
     firebase.database().ref(`players/${playerId}`).update({
       isCarried: false,
-      isVisible: true, // This should make the player visible again
+      isVisible: true,
+      animationState: 'idle',
+      carriedBy: null
+    });
+
+    firebase.database().ref(`players/${carrierId}`).update({
+      isCarrying: false,
+      carryingPlayerId: null,
       animationState: 'idle'
     });
 
-    // Clear the carrying status from the carrier
-    firebase.database().ref(`players/${carryingPlayerId}`).update({
-      isCarrying: false,  // Ensure this attribute is managed correctly
-      animationState: 'idle'
-    });
-    carryingPlayerId = null;
+    carryingPlayerId = null;  // Also reset the local state
 
     // Optionally move the player to a nearby spot if needed
     let nearbyX = players[playerId].x + 1;
@@ -418,10 +486,10 @@ function escapePlayer() {
     }
 
     console.log(`Player ${playerId} has successfully escaped from being carried.`);
-  } else {
-    console.log("No valid escape conditions met for player:", playerId);
   }
 }
+
+
 
 
 
