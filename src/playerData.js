@@ -18,13 +18,11 @@ export let playerId;
 export let playerRef;
 export let players = {};
 export let playerElements = {};
-export let carryingPlayerId = null; // Add this near your other global variable declarations
-
-// Add this near your other global variable declarations
+export let carryingPlayerId = null;
 let escapeKeyPressCount = 0;
-const ESCAPE_KEY_PRESS_LIMIT = 10; // Number of key presses needed to escape
+const ESCAPE_KEY_PRESS_LIMIT = 10;
 
-const WIN_COIN_COUNT = 75; // The coin count needed to win the game
+const WIN_COIN_COUNT = 75;
 
 new KeyPressListener("ArrowUp", () => handleArrowPress(0, -1));
 new KeyPressListener("ArrowDown", () => handleArrowPress(0, 1));
@@ -63,8 +61,6 @@ function checkForNpcInteraction(playerX, playerY) {
 
 let countdownInterval = null;
 
-
-
 function showWinPopup(winningPlayerId, countdownSeconds = 10) {
   // Clear any existing popup and intervals
   const existingPopup = document.querySelector(".win-popup");
@@ -77,16 +73,24 @@ function showWinPopup(winningPlayerId, countdownSeconds = 10) {
   const isLocalPlayerWinner = playerId === winningPlayerId;
   const winningPlayerName = players[winningPlayerId].name;
   const localPlayerName = players[playerId].name;
-  const displayedName = isLocalPlayerWinner ? winningPlayerName : localPlayerName;
-  const statusMessage = isLocalPlayerWinner ? "🏆 Winner! 🏆" : "Better luck next time";
+  const displayedName = isLocalPlayerWinner
+    ? winningPlayerName
+    : localPlayerName;
+  const statusMessage = isLocalPlayerWinner
+    ? "🏆 Winner! 🏆"
+    : "Better luck next time";
   const titleText = isLocalPlayerWinner ? "Congratulations!" : "Game Over!";
 
   // Construct the leaderboard HTML
-  const sortedPlayers = Object.values(players).sort((a, b) => b.coins - a.coins);
+  const sortedPlayers = Object.values(players).sort(
+    (a, b) => b.coins - a.coins
+  );
   let leaderboardHTML = '<ol class="leaderboard">';
   sortedPlayers.forEach((player, index) => {
     const itemClass = player.id === winningPlayerId ? "winner" : "loser";
-    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${player.name} - ${player.coins} ${player.readyToPlayAgain ? "✅" : ""}</li>`;
+    leaderboardHTML += `<li class="${itemClass}">${index + 1}. ${
+      player.name
+    } - ${player.coins} ${player.readyToPlayAgain ? "✅" : ""}</li>`;
   });
   leaderboardHTML += "</ol>";
 
@@ -95,7 +99,9 @@ function showWinPopup(winningPlayerId, countdownSeconds = 10) {
   winPopup.className = "win-popup";
   winPopup.innerHTML = `
     <h2 class="win-title">${titleText}</h2>
-    <p class="status-message ${isLocalPlayerWinner ? "winner" : "loser"}">${statusMessage} ${displayedName}</p>
+    <p class="status-message ${
+      isLocalPlayerWinner ? "winner" : "loser"
+    }">${statusMessage} ${displayedName}</p>
     <h3>Leaderboard</h3>
     ${leaderboardHTML}
     <p id="countdown" style="font-size: 20px; font-weight: bold; margin-top: 20px;">Restarting in ${countdownSeconds} seconds...</p>
@@ -126,10 +132,6 @@ function clearExistingInterval() {
   }
 }
 
-// ...keep the rest of the code as is
-
-
-
 function resetGame() {
   // reset the game
   console.log("Resetting the game...");
@@ -148,14 +150,13 @@ function resetGame() {
       });
     });
   });
-  //reset player location 
+  //reset player location
   const { x, y } = getRandomSafeSpot();
   playerRef.update({
     x,
     y,
     readyToPlayAgain: true,
   });
-
 
   // Remove the win popup
   const winPopup = document.querySelector(".win-popup");
@@ -164,14 +165,7 @@ function resetGame() {
   }
   // Start the game again
   initGame();
-
-
 }
-
-
-
-
-
 
 export function checkWinCondition(playerId) {
   const player = players[playerId];
@@ -184,9 +178,6 @@ export function checkWinCondition(playerId) {
     });
   }
 }
-
-
-
 
 allPlayersRef.on("value", (snapshot) => {
   players = snapshot.val() || {};
@@ -292,13 +283,21 @@ function updateAnimationState() {
   }
 }
 
-
 document.addEventListener("keydown", function (event) {
-  console.log("Key pressed:", event.key); // Confirm this logs
+  console.log("Key pressed:", event.key);
+  const activeElement = document.activeElement;
+  const chatInput = document.querySelector("#chat-input");
+  const playerNameInput = document.querySelector("#player-name");
+
+  if (
+    (activeElement === chatInput || activeElement === playerNameInput) &&
+    ["k", "p", "t"].includes(event.key)
+  ) {
+    return;
+  }
 
   let keyHandled = false;
 
-  // Handle movement keys
   if (event.key === "ArrowUp") {
     movementFlags.up = true;
     keyHandled = true;
@@ -323,15 +322,14 @@ document.addEventListener("keydown", function (event) {
     attemptToThrowPlayer();
     keyHandled = true;
   } else if (event.key === "e" && players[playerId].isCarried) {
-    console.log("Escape attempt detected"); // Check if this logs
+    console.log("Escape attempt detected");
     escapeKeyPressCount++;
-    console.log("Escape key press count:", escapeKeyPressCount); // Debug the count
+    console.log("Escape key press count:", escapeKeyPressCount);
     if (escapeKeyPressCount >= ESCAPE_KEY_PRESS_LIMIT) {
-      console.log("Attempting to escape"); // Check if this gets logged
+      console.log("Attempting to escape");
       escapePlayer();
       keyHandled = true;
     }
-
   }
 
   if (keyHandled) {
@@ -339,7 +337,6 @@ document.addEventListener("keydown", function (event) {
     updateAnimationState();
   }
 });
-
 
 firebase
   .database()
@@ -371,8 +368,6 @@ function performKick() {
     players[playerId].y +
     (kickDirection === "up" ? -1 : kickDirection === "down" ? 1 : 0);
 
-
-
   Object.keys(players).forEach(function (id) {
     if (players[id].x === kickRangeX && players[id].y === kickRangeY) {
       // Attempt to bump the player back by 2 spaces, but check for obstacles
@@ -389,7 +384,6 @@ function performKick() {
           !isSolid(bumpedBackX, bumpedBackY) &&
           withinBoundaries(bumpedBackX, bumpedBackY)
         ) {
-
           // Move the player as far as possible before hitting the obstacle
           // Update the bumped player's position and animation state to "hit" in Firebase
           firebase
@@ -428,7 +422,10 @@ function attemptToPickUpPlayer() {
 
       console.log(`Trying to pick up: Checking conditions for ${id}`);
 
-      if ((distanceX === 1 && distanceY === 0) || (distanceX === 0 && distanceY === 1)) {
+      if (
+        (distanceX === 1 && distanceY === 0) ||
+        (distanceX === 0 && distanceY === 1)
+      ) {
         carryingPlayerId = id; // Mark the carrying player ID
         players[playerId].isCarrying = true;
         players[id].isCarried = true;
@@ -436,13 +433,13 @@ function attemptToPickUpPlayer() {
 
         firebase.database().ref(`players/${playerId}`).update({
           isCarrying: true,
-          carryingPlayerId: id
+          carryingPlayerId: id,
         });
 
         firebase.database().ref(`players/${id}`).update({
           isCarried: true,
           carriedBy: playerId,
-          isVisible: false
+          isVisible: false,
         });
 
         console.log(`Player ${playerId} is now carrying player ${id}.`);
@@ -455,7 +452,9 @@ function escapePlayer() {
   if (players[playerId].isCarried && players[playerId].carriedBy) {
     let carrierId = players[playerId].carriedBy;
 
-    console.log(`Escape initiated by ${playerId} who is carried by ${carrierId}`);
+    console.log(
+      `Escape initiated by ${playerId} who is carried by ${carrierId}`
+    );
 
     // Reset escape key press count
     escapeKeyPressCount = 0;
@@ -464,17 +463,17 @@ function escapePlayer() {
     firebase.database().ref(`players/${playerId}`).update({
       isCarried: false,
       isVisible: true,
-      animationState: 'idle',
-      carriedBy: null
+      animationState: "idle",
+      carriedBy: null,
     });
 
     firebase.database().ref(`players/${carrierId}`).update({
       isCarrying: false,
       carryingPlayerId: null,
-      animationState: 'idle'
+      animationState: "idle",
     });
 
-    carryingPlayerId = null;  // Also reset the local state
+    carryingPlayerId = null; // Also reset the local state
 
     // Optionally move the player to a nearby spot if needed
     let nearbyX = players[playerId].x + 1;
@@ -485,20 +484,11 @@ function escapePlayer() {
       playerRef.set(players[playerId]);
     }
 
-    console.log(`Player ${playerId} has successfully escaped from being carried.`);
+    console.log(
+      `Player ${playerId} has successfully escaped from being carried.`
+    );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 const throwDistance = 2; // Tiles the player can be thrown
 
