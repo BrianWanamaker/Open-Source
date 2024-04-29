@@ -91,14 +91,14 @@ Ensure you have the following installed:
    Example .env file:
    ```
    ```txt
-   apiKey: "exampleAPIKey"
-   authDomain: "example.firebaseapp.com",
-   databaseURL: "https://example.firebaseio.com",
-   projectId: "open-source-example-",
-   storageBucket: "open-source-example.com",
-   messagingSenderId: "1234567",
-   appId: "1:2345678",
-   measurementId: "E-123456"
+   API_KEY=exampleAPIKey
+   AUTH_DOMAIN=example.firebaseapp.com
+   DATABASE_URL=https://example.firebaseio.com
+   PROJECT_ID=open-source-example-
+   STORAGE_BUCKET=open-source-example.com
+   MESSAGING_SENDER_ID=1234567
+   APP_ID=1:2345678
+   MEASUREMENT_ID=E-123456
    ```
 8. Install HTTP-Server
     - To install using npm (Node.js must be installed), run:
